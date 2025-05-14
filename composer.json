@@ -1,0 +1,14 @@
+{
+    "name": "wp-capture/plugin",
+    "description": "WordPress Email Capture Plugin",
+    "type": "wordpress-plugin",
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "wp-coding-standards/wpcs": "^2.3"
+    },
+    "scripts": {
+        "phpcs": "phpcs --standard=WordPress ./includes ./blocks ./wp-capture.php",
+        "phpcbf": "phpcbf --standard=WordPress ./includes ./blocks ./wp-capture.php"
+    }
+} 
