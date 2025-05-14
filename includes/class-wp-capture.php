@@ -15,10 +15,19 @@ class WP_Capture {
     private $ems_services = array();
 
     /**
+     * The encryption service instance.
+     *
+     * @since 1.0.0 // Update if version changes
+     * @var Encryption|null
+     */
+    private $encryption_service = null;
+
+    /**
      * Initialize the plugin.
      */
     public function __construct() {
         $this->load_dependencies();
+        $this->encryption_service = new Encryption(); // Instantiate your Encryption class
         $this->register_ems_services();
         $this->define_admin_hooks();
         $this->define_public_hooks();
@@ -33,8 +42,8 @@ class WP_Capture {
         require_once WP_CAPTURE_PLUGIN_DIR . 'includes/ems/class-mailchimp-service.php';
         require_once WP_CAPTURE_PLUGIN_DIR . 'includes/ems/class-convertkit-service.php';
 
-        // Load encryption utility class - REMOVED
-        // require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-wp-capture-encryption.php';
+        // Load your custom Encryption class
+        require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-encryption.php';
         
         // Load admin and public classes
         require_once WP_CAPTURE_PLUGIN_DIR . 'includes/admin/class-wp-capture-admin.php';
@@ -80,6 +89,16 @@ class WP_Capture {
         }
         
         return $providers;
+    }
+
+    /**
+     * Get the encryption service instance.
+     *
+     * @since 1.0.0 // Update if version changes
+     * @return Encryption|null The encryption service instance.
+     */
+    public function get_encryption_service() {
+        return $this->encryption_service;
     }
 
     /**

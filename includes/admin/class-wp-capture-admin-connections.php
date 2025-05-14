@@ -68,16 +68,42 @@ class WP_Capture_Admin_Connections {
                 
                 echo '<p><label for="wp-capture-api-key-' . esc_attr($connection_id) . '">' . __('API Key', 'wp-capture') . ':</label><br/>';
 
-                if (isset($connection['api_key']) && !empty($connection['api_key'])) {
-                    // Mask the API key, showing only the last 4 characters
-                    $masked_key = '••••••••••••' . substr(esc_html($connection['api_key']), -4);
-                    echo '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__('Current key:', 'wp-capture') . ' ' . $masked_key . '</em></p>';
-                    $placeholder_text = __('Enter new key to change, or leave empty to keep current', 'wp-capture');
+                $stored_encrypted_key = isset($connection['api_key']) ? $connection['api_key'] : '';
+                $placeholder_text = __('Enter API key', 'wp-capture');
+                $key_display_html = '';
+
+                if (!empty($stored_encrypted_key)) {
+                    $encryption_service = $this->plugin->get_encryption_service();
+                    $decrypted_key_for_display = '';
+
+                    if ($encryption_service) {
+                        $decrypted_key_for_display = $encryption_service->decrypt($stored_encrypted_key);
+                    }
+
+                    if (!empty($decrypted_key_for_display)) {
+                        // If OpenSSL is off, decrypt returns original, so this will mask the stored plaintext.
+                        // If OpenSSL is on and decryption worked, this will mask the decrypted plaintext.
+                        // If OpenSSL is on but decryption failed and returned original (encrypted) string, this will mask the encrypted string.
+                        // We rely on the decrypt method's behavior to either give plaintext or the original if issues.
+                        $masked_key_preview = '••••••••••••' . substr(esc_html($decrypted_key_for_display), -4);
+                        $key_display_html = '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__('Current key:', 'wp-capture') . ' ' . $masked_key_preview . '</em></p>';
+                        $placeholder_text = __('Enter new key to change, or leave empty to keep current', 'wp-capture');
+                    } elseif ($encryption_service) {
+                        // Stored key was not empty, but decrypted display key is empty.
+                        // This implies an issue with decryption if OpenSSL was active, or empty key was stored post-encryption (unlikely).
+                        $key_display_html = '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__('Current key: Set (preview unavailable)', 'wp-capture') . '</em></p>';
+                        $placeholder_text = __('Enter new key to change, or leave empty to keep current', 'wp-capture');
+                    } else {
+                        // Encryption service itself is not available.
+                        $key_display_html = '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__('Current key: Set (encryption service unavailable)', 'wp-capture') . '</em></p>';
+                        $placeholder_text = __('Enter new key to change, or leave empty to keep current', 'wp-capture');
+                    }
                 } else {
                     // If no key is set
-                    echo '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__('No API key set.', 'wp-capture') . '</em></p>';
-                    $placeholder_text = __('Enter API key', 'wp-capture');
+                    $key_display_html = '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__('No API key set.', 'wp-capture') . '</em></p>';
                 }
+                
+                echo $key_display_html; // Output the determined key display HTML
 
                 echo '<input id="wp-capture-api-key-' . esc_attr($connection_id) . '" type="text" class="wp-capture-api-key-input" name="wp_capture_options[ems_connections][' . esc_attr($connection_id) . '][api_key]" value="" placeholder="' . esc_attr($placeholder_text) . '" autocomplete="off" style="width: 100%;" />';
                 
@@ -149,6 +175,7 @@ class WP_Capture_Admin_Connections {
             return;
         }
 
+        // Use the raw API key for validation
         $credentials_for_validation = array('api_key' => $raw_api_key);
         $valid = $service->validateCredentials($credentials_for_validation);
 
@@ -157,7 +184,22 @@ class WP_Capture_Admin_Connections {
             return;
         }
 
-        $api_key_to_save = $raw_api_key;
+        // Encrypt the API key before saving
+        $encryption_service = $this->plugin->get_encryption_service();
+        if ( ! $encryption_service ) {
+            // This case should ideally be handled by an admin notice, but good to have a fallback
+            wp_send_json_error(array('message' => __('Encryption service is not available. Cannot save connection.', 'wp-capture')));
+            return;
+        }
+        $api_key_to_save = $encryption_service->encrypt($raw_api_key);
+        if ( $api_key_to_save === $raw_api_key && extension_loaded('openssl') && Encryption::is_properly_configured()) {
+            // If encryption returned the same value and OpenSSL is loaded and keys are configured,
+            // it implies an encryption failure for some other reason, or the key was empty.
+            // We already check for empty raw_api_key, so this is an unexpected state.
+            error_log('WP Capture: API Key encryption failed unexpectedly for new connection.');
+            wp_send_json_error(array('message' => __('Could not securely save the API key. Encryption failed.', 'wp-capture')));
+            return;
+        }
 
         $options = get_option('wp_capture_options', array());
         if (!isset($options['ems_connections'])) {
@@ -222,7 +264,18 @@ class WP_Capture_Admin_Connections {
             return;
         }
 
-        $credentials = array('api_key' => $stored_api_key);
+        // Decrypt the stored API key for validation
+        $encryption_service = $this->plugin->get_encryption_service();
+        if ( ! $encryption_service ) {
+            wp_send_json_error(array('message' => __('Encryption service is not available. Cannot test connection.', 'wp-capture')));
+            return;
+        }
+        $decrypted_api_key = $encryption_service->decrypt($stored_api_key);
+        // If decryption returns the same as stored and openssl is on and keys are configured, it might mean it was stored as plaintext
+        // or decryption failed silently (though our modified decrypt logs errors).
+        // We proceed with the decrypted_api_key regardless, as per user's preference for encrypt/decrypt behavior.
+
+        $credentials = array('api_key' => $decrypted_api_key);
         $valid = $service->validateCredentials($credentials);
 
         if ($valid) {
@@ -308,7 +361,7 @@ class WP_Capture_Admin_Connections {
 
         $current_connection = $options['ems_connections'][$connection_id];
         $provider = $current_connection['provider'];
-        $api_key_to_save = $current_connection['api_key'];
+        $api_key_to_save = $current_connection['api_key']; // Keep current encrypted key by default
 
         if (!empty($submitted_raw_api_key)) {
             $service = $this->plugin->get_service($provider);
@@ -317,6 +370,7 @@ class WP_Capture_Admin_Connections {
                 return;
             }
 
+            // Use the raw submitted API key for validation
             $credentials_for_validation = array('api_key' => $submitted_raw_api_key);
             $valid = $service->validateCredentials($credentials_for_validation);
 
@@ -325,7 +379,18 @@ class WP_Capture_Admin_Connections {
                 return;
             }
             
-            $api_key_to_save = $submitted_raw_api_key;
+            // Encrypt the new API key before saving
+            $encryption_service = $this->plugin->get_encryption_service();
+            if ( ! $encryption_service ) {
+                 wp_send_json_error(array('message' => __('Encryption service is not available. Cannot update connection.', 'wp-capture')));
+                return;
+            }
+            $api_key_to_save = $encryption_service->encrypt($submitted_raw_api_key);
+            if ( $api_key_to_save === $submitted_raw_api_key && !empty($submitted_raw_api_key) && extension_loaded('openssl') && Encryption::is_properly_configured() ) {
+                 error_log('WP Capture: API Key encryption failed unexpectedly during update.');
+                 wp_send_json_error(array('message' => __('Could not securely save the new API key. Encryption failed.', 'wp-capture')));
+                return;
+            }
         }
 
         $options['ems_connections'][$connection_id]['name'] = $submitted_name;

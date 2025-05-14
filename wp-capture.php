@@ -59,6 +59,8 @@ function run_wp_capture() {
     
     // Initialize the plugin
     $plugin = new WP_Capture();
+    // Make the instance globally accessible
+    $GLOBALS['wp_capture_instance'] = $plugin;
 }
 run_wp_capture();
 
@@ -114,17 +116,23 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 
     $connection_details = $connections[$default_ems_id];
     $provider_slug = $connection_details['provider'];
-    // Ensure the main plugin class is available to get the service
-    // This is a bit of a shortcut; ideally, we'd access this through a well-defined global or service locator.
-    global $wp_capture_instance;
-    if ( ! $wp_capture_instance && class_exists('WP_Capture') ) { // Fallback if not globally set
-        $wp_capture_instance = new WP_Capture();
-    }
-
-    if ( ! $wp_capture_instance || ! method_exists( $wp_capture_instance, 'get_service' ) ) {
+    
+    // Access the global plugin instance
+    if ( ! isset( $GLOBALS['wp_capture_instance'] ) ) {
          return new WP_REST_Response( array(
             'success' => false,
-            'message' => __( 'Could not access WP Capture service manager.', 'wp-capture' ),
+            'message' => __( 'WP Capture main instance not available.', 'wp-capture' ),
+            'lists'   => array()
+        ), 500 );
+    }
+    $wp_capture_instance = $GLOBALS['wp_capture_instance'];
+    $encryption_service = $wp_capture_instance->get_encryption_service();
+
+    if ( ! $encryption_service ) {
+        error_log('WP Capture REST API: Encryption service not available.');
+        return new WP_REST_Response( array(
+            'success' => false,
+            'message' => __( 'Encryption service not available for fetching lists.', 'wp-capture' ),
             'lists'   => array()
         ), 500 );
     }
@@ -140,17 +148,41 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
     }
 
     try {
-        $stored_api_key = $connection_details['api_key'] ?? ''; // API key is now plain text
+        $stored_encrypted_api_key = $connection_details['api_key'] ?? '';
 
-        if ( empty( $stored_api_key ) ) {
+        if ( empty( $stored_encrypted_api_key ) ) {
             return new WP_REST_Response( array(
                 'success' => false,
-                'message' => __( 'API key for the default EMS is missing.', 'wp-capture' ),
+                'message' => __( 'API key for the default EMS is missing or not configured.', 'wp-capture' ),
                 'lists'   => array()
-            ), 200 ); // Return 200 as client expects this for config issues
+            ), 200 );
         }
 
-        $credentials = array( 'api_key' => $stored_api_key ); // Use plain text API key
+        $decrypted_api_key = $encryption_service->decrypt( $stored_encrypted_api_key );
+        
+        // Check if decryption returned the original value (potential issue if OpenSSL active & keys configured)
+        if ( $decrypted_api_key === $stored_encrypted_api_key && !empty($stored_encrypted_api_key) && extension_loaded('openssl') && Encryption::is_properly_configured() ) {
+            error_log('WP Capture REST API: API Key decryption failed or returned original encrypted value unexpectedly.');
+            return new WP_REST_Response( array(
+                'success' => false,
+                'message' => __( 'Could not securely retrieve API key for fetching lists.', 'wp-capture' ),
+                'lists'   => array()
+            ), 500 );
+        }
+        
+        if ( empty( $decrypted_api_key ) && !empty( $stored_encrypted_api_key )) {
+             // This means decryption failed and returned an empty string, or it was stored empty AND OpenSSL is off / keys bad.
+             // If stored_encrypted_api_key was indeed empty, the first check would have caught it.
+             // So this implies a failure to decrypt an actual key, or it was stored as empty string post-encryption (unlikely).
+            error_log('WP Capture REST API: Decrypted API key is empty for ' . $provider_slug);
+             return new WP_REST_Response( array(
+                'success' => false,
+                'message' => __( 'Failed to decrypt API key for the default EMS.', 'wp-capture' ),
+                'lists'   => array()
+            ), 500 );
+        }
+
+        $credentials = array( 'api_key' => $decrypted_api_key );
         $lists = $service->getLists( $credentials );
 
         if ( $lists === false || is_wp_error( $lists ) ) {
@@ -270,54 +302,54 @@ function wp_capture_ajax_submit_form() {
 
     $connection_details = $connections[$default_ems_id];
     $provider_slug = $connection_details['provider'];
-    $stored_api_key = $connection_details['api_key'] ?? ''; // API key is now plain text
+    $stored_encrypted_api_key = $connection_details['api_key'] ?? '';
 
-    if ( empty( $stored_api_key ) ) {
-        error_log('WP Capture: API key for ' . $provider_slug . ' is empty in options.'); // Changed log message slightly
-        // User-facing message should be generic for security.
-        wp_send_json_error( array( 'message' => __( 'Could not process subscription: API configuration error.', 'wp-capture' ) ) );
+    if ( empty( $stored_encrypted_api_key ) ) {
+        error_log('WP Capture AJAX: API key for ' . $provider_slug . ' is empty in options.');
+        wp_send_json_error( array( 'message' => __( 'Could not process subscription: API configuration error (key missing).', 'wp-capture' ) ) );
         return;
     }
 
-    // Decrypt the API key
-    if ( ! class_exists('WP_Capture_Encryption') || ! WP_Capture_Encryption::is_encryption_available() ) {
-        error_log('WP Capture: Encryption services not available during form submission for ' . $provider_slug . '.');
+    // Access the global plugin instance and encryption service
+    if ( ! isset( $GLOBALS['wp_capture_instance'] ) ) {
+        error_log('WP Capture AJAX: Main plugin instance not available.');
+        wp_send_json_error( array( 'message' => __( 'Could not process subscription: Plugin core error.', 'wp-capture' ) ) );
+        return;
+    }
+    $wp_capture_instance = $GLOBALS['wp_capture_instance'];
+    $encryption_service = $wp_capture_instance->get_encryption_service();
+
+    if ( ! $encryption_service ) {
+        error_log('WP Capture AJAX: Encryption service not available for form submission for ' . $provider_slug . '.');
         wp_send_json_error( array( 'message' => __( 'Could not process subscription: Security setup incomplete. Please contact site admin.', 'wp-capture' ) ) );
         return;
     }
 
-    $decrypted_api_key = WP_Capture_Encryption::decrypt( $encrypted_api_key );
+    $decrypted_api_key = $encryption_service->decrypt( $stored_encrypted_api_key );
 
-    if ( false === $decrypted_api_key ) {
-        error_log('WP Capture: Failed to decrypt API key for ' . $provider_slug . ' during form submission.');
-        // Admin should be notified about this separately if it persists.
-        wp_send_json_error( array( 'message' => __( 'Could not process subscription: API credential retrieval failed. Please contact site admin.', 'wp-capture' ) ) );
+    if ( $decrypted_api_key === $stored_encrypted_api_key && !empty($stored_encrypted_api_key) && extension_loaded('openssl') && Encryption::is_properly_configured() ) {
+        error_log('WP Capture AJAX: API Key decryption failed or returned original encrypted value unexpectedly for ' . $provider_slug);
+        wp_send_json_error( array( 'message' => __( 'Could not process subscription: API credential retrieval failed (decryption). Please contact site admin.', 'wp-capture' ) ) );
         return;
     }
     
-    if ( empty( $decrypted_api_key ) ) {
-        error_log('WP Capture: Decrypted API key is empty for ' . $provider_slug . ' during form submission.');
-        wp_send_json_error( array( 'message' => __( 'Could not process subscription: API configuration issue. Please contact site admin.', 'wp-capture' ) ) );
+    if ( empty( $decrypted_api_key ) && !empty( $stored_encrypted_api_key )) {
+        // Similar to REST API, implies a decryption failure of an actual key
+        error_log('WP Capture AJAX: Decrypted API key is empty for ' . $provider_slug . ' during form submission.');
+        wp_send_json_error( array( 'message' => __( 'Could not process subscription: API configuration issue (empty decrypted key). Please contact site admin.', 'wp-capture' ) ) );
         return;
     }
+    
+    // If $decrypted_api_key is empty AND $stored_encrypted_api_key was also empty, the first check for empty stored key would have hit.
+    // If OpenSSL is off or keys are bad, decrypt returns original value. If that original value was empty, then this is correct.
+    // The scenario for this specific error condition is an actual encrypted key that decrypts to an empty string, which should not happen.
 
     $credentials = array( 'api_key' => $decrypted_api_key );
-
-    global $wp_capture_instance; // Access the global instance set up in run_wp_capture()
-    if ( ! $wp_capture_instance && class_exists('WP_Capture') ) {
-        $wp_capture_instance = new WP_Capture(); // Fallback initialization
-    }
-
-    if ( ! $wp_capture_instance || ! method_exists( $wp_capture_instance, 'get_service' ) ) {
-        error_log('WP Capture: Could not access WP Capture service manager in AJAX handler.');
-        wp_send_json_error( array( 'message' => __( 'Service manager not available.', 'wp-capture' ) ) );
-        return;
-    }
 
     $service = $wp_capture_instance->get_service( $provider_slug );
 
     if ( ! $service ) {
-        error_log('WP Capture: EMS Service for ' . esc_html( $provider_slug ) . ' not found in AJAX handler.');
+        error_log('WP Capture AJAX: EMS Service for ' . esc_html( $provider_slug ) . ' not found in AJAX handler.');
         wp_send_json_error( array( 'message' => sprintf( __( 'EMS Provider "%s" service not found.', 'wp-capture' ), esc_html( $provider_slug ) ) ) );
         return;
     }
@@ -384,4 +416,3 @@ function wp_capture_ajax_submit_form() {
 }
 add_action( 'wp_ajax_wp_capture_submit', 'wp_capture_ajax_submit_form' );
 add_action( 'wp_ajax_nopriv_wp_capture_submit', 'wp_capture_ajax_submit_form' );
-

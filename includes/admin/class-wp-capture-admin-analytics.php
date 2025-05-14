@@ -48,7 +48,9 @@ class WP_Capture_Admin_Analytics {
         echo '<thead><tr>';
         echo '<th scope="col">' . __('Page/Post Title', 'wp-capture') . '</th>';
         echo '<th scope="col">' . __('Form Identifier', 'wp-capture') . '</th>';
+        echo '<th scope="col">' . __('Views', 'wp-capture') . '</th>';
         echo '<th scope="col">' . __('Submissions', 'wp-capture') . '</th>';
+        echo '<th scope="col">' . __('Conversion Rate', 'wp-capture') . '</th>';
         echo '<th scope="col">' . __('Last Submission', 'wp-capture') . '</th>';
         echo '</tr></thead>';
         echo '<tbody>';
@@ -57,6 +59,7 @@ class WP_Capture_Admin_Analytics {
             $post_id = isset($data['post_id']) ? intval($data['post_id']) : 0;
             // $post_title = isset($data['post_title']) ? esc_html($data['post_title']) : __('N/A', 'wp-capture'); // Keep original logic for deleted posts
             $count = isset($data['count']) ? intval($data['count']) : 0;
+            $views = isset($data['views']) ? intval($data['views']) : 0; // Initialize views
             $last_submission_timestamp = isset($data['last_submission_timestamp']) ? $data['last_submission_timestamp'] : 0;
             $form_identifier_display = esc_html(substr($form_id, 0, 12) . (strlen($form_id) > 12 ? '...' : ''));
 
@@ -84,7 +87,16 @@ class WP_Capture_Admin_Analytics {
             echo '<tr>';
             echo '<td>' . $title_display . '</td>'; // Already escaped or contains HTML
             echo '<td>' . $form_identifier_display . '</td>';
+            echo '<td>' . $views . '</td>';
             echo '<td>' . $count . '</td>';
+            echo '<td>';
+            if ($views > 0) {
+                $conversion_rate = ($count / $views) * 100;
+                echo number_format($conversion_rate, 2) . '%';
+            } else {
+                echo __('N/A', 'wp-capture');
+            }
+            echo '</td>';
             echo '<td>';
             if ($last_submission_timestamp > 0) {
                 echo sprintf(esc_html__('%1$s at %2$s', 'wp-capture'),

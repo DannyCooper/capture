@@ -65,8 +65,8 @@ class WP_Capture_Admin {
         // AJAX actions are now registered within their respective handler classes (Connections)
         // Settings registration (register_setting) is now handled by WP_Capture_Admin_Settings via admin_init hook
 
-        // Removed encryption notice hook
-        // add_action( 'admin_notices', array( $this, 'encryption_unavailable_notice' ) );
+        // Check and display encryption status notice
+        add_action( 'admin_notices', array( $this, 'encryption_status_notice' ) );
     }
 
     /**
@@ -180,6 +180,65 @@ class WP_Capture_Admin {
      */
     public function get_plugin() {
         return $this->plugin;
+    }
+
+    /**
+     * Displays an admin notice regarding the encryption setup status.
+     *
+     * This notice checks if OpenSSL is available and if custom encryption keys
+     * are defined. It guides the user to set them in wp-config.php if they are not.
+     *
+     * @since 1.0.0 // Or your current version
+     */
+    public function encryption_status_notice() {
+        // Ensure Encryption class is available
+        if ( ! class_exists( 'Encryption' ) ) {
+            // This should not happen if dependencies are loaded correctly
+            echo '<div class="notice notice-error"><p>' . esc_html__( 'WP Capture: Encryption class not found. Please check plugin integrity.', 'wp-capture' ) . '</p></div>';
+            return;
+        }
+
+        $notice_message = '';
+        $is_securely_configured = Encryption::is_properly_configured();
+        $openssl_loaded = extension_loaded('openssl');
+
+        if ( ! $openssl_loaded ) {
+            $notice_message .= '<p><strong>' . esc_html__( 'OpenSSL Not Available:', 'wp-capture' ) . '</strong> ' .
+                               esc_html__( 'The OpenSSL PHP extension is not loaded on your server. API keys will be stored and handled in plaintext. This is a significant security risk if you handle sensitive API keys.', 'wp-capture' ) .
+                               '</p>';
+        }
+
+        if ( ! $is_securely_configured ) {
+            if ($openssl_loaded) { // Only show this part if OpenSSL is loaded but keys are fallback
+                 $notice_message .= '<p><strong>' . esc_html__( 'Insecure Encryption Key/Salt:', 'wp-capture' ) . '</strong> ' .
+                                   sprintf(
+                                       /* translators: %1$s: CAPTURE_API_ENCRYPTION_KEY, %2$s: CAPTURE_API_ENCRYPTION_SALT, %3$s: wp-config.php */
+                                       esc_html__( 'WP Capture is using fallback encryption keys/salts. For enhanced security, please define %1$s and %2$s in your %3$s file. Until then, encryption may be less secure.', 'wp-capture' ),
+                                       '<code>CAPTURE_API_ENCRYPTION_KEY</code>',
+                                       '<code>CAPTURE_API_ENCRYPTION_SALT</code>',
+                                       '<code>wp-config.php</code>'
+                                   ) . '</p>';
+            } else { // If OpenSSL is not loaded, the key configuration is secondary to plaintext storage.
+                 $notice_message .= '<p><strong>' . esc_html__( 'Encryption Configuration:', 'wp-capture' ) . '</strong> ' .
+                                   sprintf(
+                                       /* translators: %1$s: CAPTURE_API_ENCRYPTION_KEY, %2$s: CAPTURE_API_ENCRYPTION_SALT, %3$s: wp-config.php */
+                                       esc_html__( 'Additionally, for when OpenSSL is available, ensure you define %1$s and %2$s in your %3$s file for secure encryption.', 'wp-capture' ),
+                                       '<code>CAPTURE_API_ENCRYPTION_KEY</code>',
+                                       '<code>CAPTURE_API_ENCRYPTION_SALT</code>',
+                                       '<code>wp-config.php</code>'
+                                   ) . '</p>';
+            }
+        } elseif ($openssl_loaded && $is_securely_configured) {
+            // Optionally, show a success message or nothing if everything is fine.
+            // For now, we'll only show notices if there's an issue.
+            // echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'WP Capture encryption is configured securely.', 'wp-capture' ) . '</p></div>';
+            return; // Everything is good, no notice needed unless you uncomment the above.
+        }
+
+
+        if ( ! empty( $notice_message ) ) {
+            echo '<div class="notice notice-warning is-dismissible">' . $notice_message . '</div>';
+        }
     }
 
 } 
