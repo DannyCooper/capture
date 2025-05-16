@@ -1,0 +1,32 @@
+{
+  "name": "capture-plugin-blocks",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Manages blocks for the Capture plugin.",
+  "main": "index.js",
+  "scripts": {
+    "build": "wp-scripts build --source-path=blocks",
+    "start": "wp-scripts start --source-path=blocks",
+    "check-engines": "wp-scripts check-engines",
+    "check-licenses": "wp-scripts check-licenses",
+    "format": "wp-scripts format ./blocks/**/*.{js,ts,tsx,json,css,scss,md}",
+    "lint:css": "wp-scripts lint-style ./blocks/**/*.{css,scss}",
+    "lint:js": "wp-scripts lint-js ./blocks/**/*.{js,ts,tsx}",
+    "lint:md:docs": "wp-scripts lint-md-docs",
+    "lint:pkg-json": "wp-scripts lint-pkg-json",
+    "packages-update": "wp-scripts packages-update"
+  },
+  "workspaces": [
+    "blocks/*"
+  ],
+  "devDependencies": {
+    "@wordpress/scripts": "^30.16.0"
+  },
+  "dependencies": {
+    "@wordpress/block-editor": "^11.0.0",
+    "@wordpress/blocks": "^12.0.0",
+    "@wordpress/components": "^23.0.0",
+    "@wordpress/i18n": "^4.0.0"
+  },
+  "packageManager": "npm@latest"
+}
