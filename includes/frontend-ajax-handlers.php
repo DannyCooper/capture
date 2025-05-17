@@ -95,22 +95,17 @@ function wp_capture_ajax_submit_form() {
 	$stored_encrypted_api_key = isset( $connection_details['api_key'] ) ? $connection_details['api_key'] : '';
 
 	if ( empty( $stored_encrypted_api_key ) ) {
-		// error_log( 'WP Capture AJAX: API key for ' . esc_html( $provider_slug ) . ' (Connection: ' . esc_html( $ems_connection_id ) . ') is empty in options.' );.
 		wp_send_json_error( array( 'message' => esc_html__( 'Could not process subscription: API configuration error (key missing). Contact admin.', 'wp-capture' ) ) );
 		return;
 	}
 
 	// Access the global plugin instance and encryption service.
 	if ( ! isset( $GLOBALS['wp_capture_instance'] ) ) {
-		// error_log( 'WP Capture AJAX: Main plugin instance not available.' );.
 		wp_send_json_error( array( 'message' => esc_html__( 'Could not process subscription: Plugin core error.', 'wp-capture' ) ) );
 		return;
 	}
-	// $wp_capture_instance = $GLOBALS['wp_capture_instance']; // Instance no longer needed for encryption.
-	// $encryption_service = $wp_capture_instance->get_encryption_service(); // Service is static.
 
 	if ( ! class_exists( 'Encryption' ) ) {
-		// error_log( 'WP Capture AJAX: Encryption class not available for form submission for ' . $provider_slug . '.' );.
 		wp_send_json_error( array( 'message' => esc_html__( 'Could not process subscription: Security setup incomplete. Please contact site admin.', 'wp-capture' ) ) );
 		return;
 	}
@@ -119,13 +114,11 @@ function wp_capture_ajax_submit_form() {
 
 	// If decryption returned the original value (potential issue if OpenSSL active & keys configured).
 	if ( $decrypted_api_key === $stored_encrypted_api_key && ! empty( $stored_encrypted_api_key ) && extension_loaded( 'openssl' ) && Encryption::is_properly_configured() ) {
-		// error_log( 'WP Capture AJAX: API Key decryption failed for ' . esc_html( $provider_slug ) . ' (Connection: ' . esc_html( $ems_connection_id ) . ') or returned original value.' );.
 		wp_send_json_error( array( 'message' => esc_html__( 'Could not process subscription: API credential retrieval failed. Contact admin.', 'wp-capture' ) ) );
 		return;
 	}
 
 	if ( empty( $decrypted_api_key ) && ! empty( $stored_encrypted_api_key ) ) {
-		// error_log( 'WP Capture AJAX: Decrypted API key is empty for ' . esc_html( $provider_slug ) . ' (Connection: ' . esc_html( $ems_connection_id ) . ') during form submission.' );.
 		wp_send_json_error( array( 'message' => esc_html__( 'Could not process subscription: API configuration issue. Contact admin.', 'wp-capture' ) ) );
 		return;
 	}
@@ -139,7 +132,6 @@ function wp_capture_ajax_submit_form() {
 	$service = $GLOBALS['wp_capture_instance']->get_service( $provider_slug );
 
 	if ( ! $service ) {
-		// error_log( 'WP Capture AJAX: EMS Service for ' . esc_html( $provider_slug ) . ' not found in AJAX handler.' );.
 		/* translators: %s: Provider slug. */
 		wp_send_json_error( array( 'message' => sprintf( esc_html__( 'EMS Provider "%s" service not found.', 'wp-capture' ), esc_html( $provider_slug ) ) ) );
 		return;
@@ -148,7 +140,6 @@ function wp_capture_ajax_submit_form() {
 	// Generic handling for any EMS provider that implements EmsServiceInterface.
 	if ( ! method_exists( $service, 'subscribe_email' ) || ! method_exists( $service, 'get_provider_name' ) ) {
 		$actual_provider_slug = isset( $provider_slug ) ? $provider_slug : 'unknown';
-		// error_log( "WP Capture: Service for {$actual_provider_slug} is invalid or missing required methods (subscribe_email, get_provideor)." );.
 		/* translators: %s: Provider slug. */
 		wp_send_json_error( array( 'message' => sprintf( esc_html__( 'The email service (%s) is not correctly configured.', 'wp-capture' ), esc_html( $actual_provider_slug ) ) ) );
 		return;
@@ -175,11 +166,11 @@ function wp_capture_ajax_submit_form() {
 						'count'                => 0,
 						'post_id'              => null,
 						'post_title'           => 'N/A', // Default title.
-						'first_seen_timestamp' => time(), // Replaced current_time( 'timestamp' ).
+						'first_seen_timestamp' => time(),
 					);
 				}
 				++$analytics_data[ $form_id ]['count'];
-				$analytics_data[ $form_id ]['last_submission_timestamp'] = time(); // Replaced current_time( 'timestamp' ).
+				$analytics_data[ $form_id ]['last_submission_timestamp'] = time();
 
 				if ( $post_id > 0 ) {
 					$analytics_data[ $form_id ]['post_id'] = $post_id;
@@ -198,12 +189,10 @@ function wp_capture_ajax_submit_form() {
 		} else {
 			// The service method should ideally log specific API errors from the EMS provider itself.
 			// This error is for when the service method itself returns false without throwing an exception.
-			// error_log( "WP Capture: {$provider_name}Service->subscribe_email returned false for email: {$email}, list/form ID: {$list_id}." );.
 			/* translators: %s: Provider name. */
 			wp_send_json_error( array( 'message' => sprintf( esc_html__( 'Could not subscribe with %s. Please try again later.', 'wp-capture' ), esc_html( $provider_name ) ) ) );
 		}
 	} catch ( Exception $e ) {
-		// error_log( "WP Capture: Exception during {$provider_name} subscription - " . $e->getMessage() );.
 		/* translators: %s: Provider name. */
 		wp_send_json_error( array( 'message' => sprintf( esc_html__( 'An unexpected error occurred with %s. Please try again later.', 'wp-capture' ), esc_html( $provider_name ) ) ) );
 	}

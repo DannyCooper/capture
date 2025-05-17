@@ -64,24 +64,22 @@ class WP_Capture_Public {
 
         $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : null;
         $list_id = isset($_POST['list_id']) ? sanitize_text_field($_POST['list_id']) : null;
-        // $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : null; // Will be used later
-        // $block_id = isset($_POST['block_id']) ? sanitize_text_field($_POST['block_id']) : null; // Will be used later
+        $ems_connection_id = isset($_POST['ems_connection_id']) ? sanitize_text_field($_POST['ems_connection_id']) : null;
 
-        if (empty($email) || !is_email($email) || empty($list_id)) {
-            wp_send_json_error(array('message' => __('Invalid input. Please check your email and selected list.', 'wp-capture')));
+        if (empty($email) || !is_email($email) || empty($list_id) || empty($ems_connection_id)) {
+            wp_send_json_error(array('message' => __('Invalid input. Please check your email, selected list, and ensure an EMS connection is configured for this form.', 'wp-capture')));
             return;
         }
 
         $options = get_option('wp_capture_options');
-        $global_default_ems_key = isset($options['global_default_ems']) ? $options['global_default_ems'] : null;
         $ems_connections = isset($options['ems_connections']) ? $options['ems_connections'] : array();
 
-        if (empty($global_default_ems_key) || !isset($ems_connections[$global_default_ems_key])) {
-            wp_send_json_error(array('message' => __('Global default EMS not configured or connection not found.', 'wp-capture')));
+        if (empty($ems_connections) || !isset($ems_connections[$ems_connection_id])) {
+            wp_send_json_error(array('message' => __('EMS connection not found or not configured for this form.', 'wp-capture')));
             return;
         }
         
-        $active_connection_details = $ems_connections[$global_default_ems_key];
+        $active_connection_details = $ems_connections[$ems_connection_id];
         $provider_key = $active_connection_details['provider'] ?? null;
         $credentials = $active_connection_details; // Pass all connection details as credentials
 

@@ -18,7 +18,7 @@ class MailchimpService implements EmsServiceInterface {
      * @param array $credentials The Mailchimp API credentials.
      * @return bool True if credentials are valid, false otherwise.
      */
-    public function validateCredentials(array $credentials): bool {
+    public function validate_credentials(array $credentials): bool {
         if (empty($credentials['api_key'])) {
             return false;
         }
@@ -44,7 +44,7 @@ class MailchimpService implements EmsServiceInterface {
      * @param array $credentials The Mailchimp API credentials.
      * @return array Array of lists with their IDs and names.
      */
-    public function getLists(array $credentials): array {
+    public function get_lists(array $credentials): array {
         if (empty($credentials['api_key'])) {
             return array();
         }
@@ -89,7 +89,7 @@ class MailchimpService implements EmsServiceInterface {
      * @param array $formData Additional form data (optional).
      * @return bool True if subscription was successful, false otherwise.
      */
-    public function subscribeEmail(array $credentials, string $email, string $listId, array $formData = array()): bool {
+    public function subscribe_email(array $credentials, string $email, string $listId, array $formData = array()): bool {
         if (empty($credentials['api_key']) || empty($email) || empty($listId)) {
             return false;
         }
@@ -119,7 +119,7 @@ class MailchimpService implements EmsServiceInterface {
      *
      * @return string The name of the EMS provider.
      */
-    public function getProviderName(): string {
+    public function get_provider_name(): string {
         return 'Mailchimp';
     }
 
@@ -129,7 +129,7 @@ class MailchimpService implements EmsServiceInterface {
      * @param string $apiKey The Mailchimp API key.
      * @return string|false The data center or false if invalid.
      */
-    private function getDataCenter(string $apiKey) {
+    private function get_data_center(string $apiKey) {
         $parts = explode('-', $apiKey);
         return count($parts) === 2 ? $parts[1] : false;
     }

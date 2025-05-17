@@ -314,10 +314,6 @@ class WP_Capture_Admin_Connections {
         if (isset($options['ems_connections'][$connection_id])) {
             unset($options['ems_connections'][$connection_id]);
 
-            if (isset($options['global_default_ems']) && $options['global_default_ems'] === $connection_id) {
-                $options['global_default_ems'] = '';
-            }
-
             update_option('wp_capture_options', $options);
             wp_send_json_success(array('message' => __('Connection removed successfully.', 'wp-capture')));
         } else {

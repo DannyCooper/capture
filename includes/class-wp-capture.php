@@ -44,6 +44,17 @@ class WP_Capture {
 
         // Load your custom Encryption class
         require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-encryption.php';
+
+        // Load block registration
+        require_once WP_CAPTURE_PLUGIN_DIR . 'includes/block-registration.php';
+
+        // Load REST API handlers
+        require_once WP_CAPTURE_PLUGIN_DIR . 'includes/rest-api-handlers.php';
+        // Load frontend AJAX handlers
+        require_once WP_CAPTURE_PLUGIN_DIR . 'includes/frontend-ajax-handlers.php';
+
+        // Load post type registration
+        require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-wp-capture-post-types.php';
         
         // Load admin and public classes
         require_once WP_CAPTURE_PLUGIN_DIR . 'includes/admin/class-wp-capture-admin.php';
@@ -85,7 +96,7 @@ class WP_Capture {
         $providers = array();
         
         foreach ($this->ems_services as $key => $service) {
-            $providers[$key] = $service->getProviderName();
+            $providers[$key] = $service->get_provider_name();
         }
         
         return $providers;
@@ -144,6 +155,5 @@ class WP_Capture {
         if (!interface_exists('EmsServiceInterface')) {
             require_once WP_CAPTURE_PLUGIN_DIR . 'includes/ems/interface-ems-service.php';
         }
-        register_block_type(WP_CAPTURE_PLUGIN_DIR . 'blocks/wp-capture-form/block.json');
     }
 } 

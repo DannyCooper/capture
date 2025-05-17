@@ -66,3 +66,5 @@ class WP_Capture_Post_Types {
 		register_post_type( 'capture_form', $args );
 	}
 } 
+
+new WP_Capture_Post_Types();

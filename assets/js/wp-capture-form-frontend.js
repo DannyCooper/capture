@@ -2,95 +2,101 @@
     'use strict';
 
     document.addEventListener('DOMContentLoaded', function() {
-        // console.log('WP Capture Frontend JS Loaded');
-        // console.log('Localized data:', typeof wpCaptureFrontend !== 'undefined' ? wpCaptureFrontend : 'wpCaptureFrontend not defined');
+        // Hoist frequently used wpCaptureFrontend properties and regex
+        const wpFrontend = typeof wpCaptureFrontend !== 'undefined' ? wpCaptureFrontend : {};
+        const i18n = wpFrontend.i18n || {};
+        const ajaxUrl = wpFrontend.ajaxUrl || null;
+        const nonce = wpFrontend.nonce || null;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        const forms = document.querySelectorAll('.wp-capture-form');
+        if (!ajaxUrl || !nonce) {
+            console.error('WP Capture: AJAX URL or nonce not defined.');
+            alert(i18n.configError || 'Form configuration error. Please contact site admin.');
+            return; // Stop if essential config is missing
+        }
+
+        const forms = document.querySelectorAll('.capture-form');
 
         forms.forEach(form => {
-            form.addEventListener('submit', function(event) {
+            form.addEventListener('submit', async function(event) { // Use async function for await
                 event.preventDefault();
-                // console.log('Form submitted');
 
-                const emailInput = form.querySelector('input[name="wp_capture_email"]');
-                const email = emailInput ? emailInput.value : null;
-                const listId = form.dataset.listId;
-                const postId = form.dataset.postId;
-                const formId = form.dataset.formId; // Use data-attribute directly
+                const emailInput = form.querySelector('.capture-form__input--email');
+                const email = emailInput ? emailInput.value : null; // Gracefully handle missing input
 
-                // Ensure wpCaptureFrontend and its properties are defined before use
-                const i18n = (typeof wpCaptureFrontend !== 'undefined' && wpCaptureFrontend.i18n) ? wpCaptureFrontend.i18n : {};
-                const ajaxUrl = (typeof wpCaptureFrontend !== 'undefined') ? wpCaptureFrontend.ajaxUrl : null;
-                const nonce = (typeof wpCaptureFrontend !== 'undefined') ? wpCaptureFrontend.nonce : null;
-
-                if (!ajaxUrl || !nonce) {
-                    console.error('WP Capture: AJAX URL or nonce not defined.');
-                    alert(i18n.configError || 'Form configuration error. Please contact site admin.');
-                    return;
-                }
-                
+                // Validations
                 if (!email || email.trim() === '') {
                     alert(i18n.emptyEmail || 'Email address cannot be empty.');
                     return;
                 }
 
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailPattern.test(email)) {
+                if (!emailPattern.test(email)) { // Uses hoisted emailPattern
                     alert(i18n.invalidEmail || 'Please enter a valid email address.');
                     return;
                 }
 
-                // console.log('Email:', email);
-                // console.log('List ID:', listId);
-                // console.log('Block ID:', blockId);
-                // console.log('Nonce:', nonce);
-                // console.log('AJAX URL:', ajaxUrl);
+                // Prepare FormData
+                const listId = form.dataset.listId;
+                const postId = form.dataset.postId;
+                const formId = form.dataset.formId;
+                const emsConnectionId = form.dataset.emsConnectionId;
 
                 const formData = new FormData();
-                formData.append('action', 'wp_capture_submit');
-                formData.append('nonce', nonce);
+                formData.append('action', 'capture_submit');
+                formData.append('nonce', nonce); // Use hoisted nonce
                 formData.append('email', email);
                 formData.append('list_id', listId);
                 if (postId) formData.append('post_id', postId);
                 if (formId) formData.append('form_id', formId);
-                // formData.append('block_id', blockId); // Removed: block_id is redundant now
+                if (emsConnectionId) formData.append('ems_connection_id', emsConnectionId);
 
-                fetch(ajaxUrl, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
+                try {
+                    const response = await fetch(ajaxUrl, { // Use hoisted ajaxUrl
+                        method: 'POST',
+                        body: formData
+                    });
+
                     if (!response.ok) {
-                        // Try to get error from JSON response, otherwise use status text
-                        return response.json().catch(() => {
-                            throw new Error(response.statusText || 'Network response was not ok.');
-                        }).then(errData => {
-                            throw new Error(errData.message || response.statusText || 'Network response was not ok.');
-                        });
+                        let errorMessage = response.statusText || 'Network response was not ok.';
+                        try {
+                            // Attempt to parse JSON error response from the server
+                            const errorData = await response.json();
+                            if (errorData && errorData.message) {
+                                errorMessage = errorData.message;
+                            }
+                        } catch (e) {
+                            // If response isn't JSON or parsing fails, stick with statusText
+                        }
+                        throw new Error(errorMessage);
                     }
-                    return response.json();
-                })
-                .then(data => {
+
+                    const data = await response.json();
+
                     if (data.success) {
-                        // console.log('Success:', data.message);
-                        alert(data.message || i18n.successMessage || 'Thank you for subscribing!');
+                        const customSuccessMessage = form.dataset.successMessage;
+                        const messageToDisplay = customSuccessMessage || data.message || i18n.successMessage || 'Thank you for subscribing!';
+
+                        form.style.display = 'none'; // Hide the form
+
+                        const successMessageElement = document.createElement('p');
+                        successMessageElement.className = 'capture-form-success-message'; // For styling
+                        successMessageElement.textContent = messageToDisplay;
+                        form.parentNode.insertBefore(successMessageElement, form.nextSibling); // Insert message after form
+
                         if (emailInput) {
                             emailInput.value = ''; // Clear input on success
                         }
                     } else {
-                        // console.error('Error:', data.message);
+                        // Handle business logic errors (e.g., email already subscribed)
                         alert(data.message || i18n.errorMessage || 'An error occurred. Please try again.');
                     }
-                })
-                .catch(error => {
-                    // console.error('Fetch Error:', error.message);
-                    alert(i18n.fetchError || 'A network error occurred. Please try again. Details: ' + error.message);
-                });
+                } catch (error) {
+                    // Handle network errors or errors thrown from the !response.ok block
+                    const details = error && error.message ? String(error.message) : 'No additional details.';
+                    alert((i18n.fetchError || 'A network error occurred. Please try again.') + ' Details: ' + details);
+                }
             });
         });
     });
 
 })();
-
-// We can remove jQuery wrapper if not needed or if we ensure vanilla JS compatibility.
-// For now, using vanilla JS querySelectorAll and fetch. 

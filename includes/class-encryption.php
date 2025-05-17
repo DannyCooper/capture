@@ -3,13 +3,28 @@
 class Encryption
 {
 
-	private $key;
-	private $salt;
+	/**
+	 * The encryption key.
+	 * @var string|null
+	 */
+	private static $key = null;
+	/**
+	 * The encryption salt.
+	 * @var string|null
+	 */
+	private static $salt = null;
 
-	public function __construct()
+	/**
+	 * Initializes the static key and salt properties if they haven't been set.
+	 */
+	private static function init_properties()
 	{
-		$this->key  = $this->getDefaultKey();
-		$this->salt = $this->getDefaultSalt();
+		if (null === self::$key) {
+			self::$key = self::get_default_key();
+		}
+		if (null === self::$salt) {
+			self::$salt = self::get_default_salt();
+		}
 	}
 
 	/**
@@ -17,7 +32,7 @@ class Encryption
 	 *
 	 * @return string
 	 */
-	private function getDefaultKey()
+	private static function get_default_key()
 	{
 		if (defined('CAPTURE_API_ENCRYPTION_KEY') && '' !== CAPTURE_API_ENCRYPTION_KEY) {
 			return CAPTURE_API_ENCRYPTION_KEY;
@@ -29,7 +44,7 @@ class Encryption
 		}
 		// It's crucial that a secure key is defined.
 		// The is_properly_configured() method will warn if this fallback is used.
-		return 'this-is-not-a-secure-key'; // Fallback
+		return 'this-is-not-a-secure-key'; // Fallback.
 	}
 
 	/**
@@ -37,7 +52,7 @@ class Encryption
 	 *
 	 * @return string
 	 */
-	private function getDefaultSalt()
+	private static function get_default_salt()
 	{
 		if (defined('CAPTURE_API_ENCRYPTION_SALT') && '' !== CAPTURE_API_ENCRYPTION_SALT) {
 			return CAPTURE_API_ENCRYPTION_SALT;
@@ -53,7 +68,7 @@ class Encryption
 		}
 		// It's crucial that a secure salt is defined.
 		// The is_properly_configured() method will warn if this fallback is used.
-		return 'this-is-not-a-secure-salt'; // Fallback
+		return 'this-is-not-a-secure-salt'; // Fallback.
 	}
 
 	/**
@@ -62,8 +77,10 @@ class Encryption
 	 * @param string $value The value to encrypt.
 	 * @return string|false The encrypted string, or false on failure.
 	 */
-	public function encrypt($value)
+	public static function encrypt($value)
 	{
+		self::init_properties();
+
 		if (!extension_loaded('openssl')) {
 			error_log('WP Capture Encryption Warning: OpenSSL extension is not loaded. API key will be handled in plaintext.');
 			return $value; // Return plaintext if OpenSSL is not available
@@ -73,7 +90,7 @@ class Encryption
 		$ivlen  = openssl_cipher_iv_length($method);
 		$iv     = openssl_random_pseudo_bytes($ivlen);
 
-		$raw_value = openssl_encrypt($value . $this->salt, $method, $this->key, 0, $iv);
+		$raw_value = openssl_encrypt($value . self::$salt, $method, self::$key, 0, $iv);
 
 		if (!$raw_value) {
 			return false;
@@ -88,27 +105,45 @@ class Encryption
 	 * @param string $raw_value
 	 * @return string
 	 */
-	public function decrypt($raw_value)
+	public static function decrypt($raw_value)
 	{
+		self::init_properties();
+
 		if (!extension_loaded('openssl')) {
 			error_log('WP Capture Encryption Warning: OpenSSL extension is not loaded. Attempting to use stored API key value as is.');
 			return $raw_value; // Return raw value (could be plaintext or ciphertext) if OpenSSL is not available
 		}
 
-		$raw_value = base64_decode($raw_value, true);
+		$decoded_value = base64_decode($raw_value, true);
 
 		$method = 'aes-256-ctr';
 		$ivlen  = openssl_cipher_iv_length($method);
-		$iv     = substr($raw_value, 0, $ivlen);
 
-		$raw_value = substr($raw_value, $ivlen);
+		if (strlen($decoded_value) < $ivlen) {
+			// Not enough data for IV and ciphertext.
+			return false;
+		}
+		$iv     = substr($decoded_value, 0, $ivlen);
+		$ciphertext = substr($decoded_value, $ivlen);
 
-		$value = openssl_decrypt($raw_value, $method, $this->key, 0, $iv);
-		if (!$value || substr($value, -strlen($this->salt)) !== $this->salt) {
+		if (false === $iv || false === $ciphertext) {
+			// Substr failed, which is unlikely if length check passed, but good for robustness.
 			return false;
 		}
 
-		return substr($value, 0, -strlen($this->salt));
+		$decrypted_value = openssl_decrypt($ciphertext, $method, self::$key, 0, $iv);
+
+		// Check if decryption failed or if the salt is missing.
+		// Ensure self::$salt is not empty before checking substr, to avoid errors if salt is an empty string.
+		if (false === $decrypted_value || (self::$salt !== '' && substr($decrypted_value, -strlen(self::$salt)) !== self::$salt)) {
+			return false;
+		}
+		
+		// Remove salt if it's present and not an empty string
+		if (self::$salt !== '') {
+			return substr($decrypted_value, 0, -strlen(self::$salt));
+		}
+		return $decrypted_value; // Return as is if salt is empty
 	}
 
 	/**
@@ -121,11 +156,8 @@ class Encryption
 			return false;
 		}
 
-		// We need to instantiate to check the resolved key/salt without exposing getDefaultKey/Salt as public static
-		// This is a bit of a workaround. A better design might involve passing key/salt to constructor or using static methods for key/salt retrieval.
-		$temp_instance = new self();
-		$key = $temp_instance->getDefaultKey();
-		$salt = $temp_instance->getDefaultSalt();
+		$key = self::get_default_key();
+		$salt = self::get_default_salt();
 
 		if ($key === 'this-is-not-a-secure-key' || $salt === 'this-is-not-a-secure-salt') {
 			return false; // Using insecure fallback keys/salts
