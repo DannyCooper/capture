@@ -40,14 +40,17 @@
                 const postId = form.dataset.postId;
                 const formId = form.dataset.formId;
                 const emsConnectionId = form.dataset.emsConnectionId;
-
+                const firstName = form.querySelector('.capture-form__input--name')?.value || '';
+                
                 const formData = new FormData();
                 formData.append('action', 'capture_submit');
                 formData.append('nonce', nonce); // Use hoisted nonce
                 formData.append('email', email);
                 formData.append('list_id', listId);
+
                 if (postId) formData.append('post_id', postId);
                 if (formId) formData.append('form_id', formId);
+                if (firstName) formData.append('first_name', firstName);
                 if (emsConnectionId) formData.append('ems_connection_id', emsConnectionId);
 
                 try {

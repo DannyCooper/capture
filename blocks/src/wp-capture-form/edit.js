@@ -103,7 +103,11 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 	const blockProps = useBlockProps(
 		{
-			style: { gap: `${fieldGap}rem`, display: 'flex', flexDirection: formLayout === 'inline' ? 'row' : 'column' },
+			style: { 
+				gap: `${fieldGap}rem`, 
+				display: 'flex', 
+				flexDirection: formLayout === 'inline' ? 'row' : 'column' 
+		    },
 			className: `capture-form capture-form--${formLayout}`
 		}
 	);
@@ -112,8 +116,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	const buttonStyles = {
 		backgroundColor: buttonColor,
 		color: buttonTextColor,
-		// Add other button styling here if needed (padding, border, etc.)
-		padding: '10px 15px',
 		border: 'none',
 		cursor: 'pointer',
 	};
@@ -166,6 +168,21 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 							onChange={handleProviderChange}
 							help={emsProviders.length <= 1 && !providersError ? __('No EMS providers configured. Please add one in plugin settings.', 'wp-capture') : ''}
 						/>
+					)}
+
+					{/* Show local storage notice when no EMS is connected */}
+					{!emsConnectionId && (emsProviders.length <= 1 || !providersError) && (
+						<div className="wp-capture-local-notice" style={{ 
+							padding: '10px', 
+							backgroundColor: '#f0f0f0', 
+							border: '1px solid #ddd', 
+							borderRadius: '4px',
+							marginTop: '10px'
+						}}>
+							<p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
+								{__('ℹ️ No EMS provider selected. Subscribers will be stored locally in your WordPress database.', 'wp-capture')}
+							</p>
+						</div>
 					)}
 
 					{emsConnectionId && (

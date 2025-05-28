@@ -58,4 +58,4 @@ class WP_Capture_Shortcodes {
 		// Return the buffered content
 		return ob_get_clean();
 	}
-} 
+}

@@ -30,7 +30,7 @@
     },
     "fieldGap": {
       "type": "number",
-      "default": ""
+      "default": "1"
     },
     "showNameField": {
       "type": "boolean",
@@ -65,8 +65,8 @@
       "padding": true
     }
   },
-  "textdomain": "wp-capture",
-  "editorScript": "file:.//index.js",
+  "textdomain": "capture",
+  "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css",
   "viewScript": "wp-capture-form-frontend",

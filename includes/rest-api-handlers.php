@@ -29,7 +29,7 @@ add_action(
 					'ems_id' => array(
 						'required'          => true,
 						'type'              => 'string',
-						'description'       => __( 'The ID of the EMS connection.', 'wp-capture' ),
+						'description'       => __( 'The ID of the EMS connection.', 'capture' ),
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
@@ -68,7 +68,7 @@ function wp_capture_get_ems_providers_callback() {
 		return new WP_REST_Response(
 			array(
 				'success'   => true,
-				'message'   => esc_html__( 'No EMS providers configured yet.', 'wp-capture' ),
+				'message'   => esc_html__( 'No EMS providers configured yet.', 'capture' ),
 				'providers' => array(),
 			),
 			200
@@ -111,7 +111,7 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => esc_html__( 'EMS connection ID is required.', 'wp-capture' ),
+				'message' => esc_html__( 'EMS connection ID is required.', 'capture' ),
 				'lists'   => array(),
 			),
 			400
@@ -124,7 +124,7 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => sprintf( esc_html__( 'EMS connection "%s" not found.', 'wp-capture' ), esc_html( $ems_id ) ),
+				'message' => sprintf( esc_html__( 'EMS connection "%s" not found.', 'capture' ), esc_html( $ems_id ) ),
 				'lists'   => array(),
 			),
 			404
@@ -139,21 +139,18 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => esc_html__( 'WP Capture main instance not available.', 'wp-capture' ),
+				'message' => esc_html__( 'WP Capture main instance not available.', 'capture' ),
 				'lists'   => array(),
 			),
 			500
 		);
 	}
-	// $wp_capture_instance = $GLOBALS['wp_capture_instance']; // Instance no longer needed for encryption.
-	// $encryption_service = $wp_capture_instance->get_encryption_service(); // Service is static.
 
 	if ( ! class_exists( 'Encryption' ) ) {
-		// error_log( 'WP Capture REST API: Encryption class not available.' ); // Removed error_log.
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => esc_html__( 'Encryption class not available for fetching lists.', 'wp-capture' ),
+				'message' => esc_html__( 'Encryption class not available for fetching lists.', 'capture' ),
 				'lists'   => array(),
 			),
 			500
@@ -167,7 +164,7 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => sprintf( esc_html__( 'EMS Provider "%s" service not found.', 'wp-capture' ), esc_html( $provider_slug ) ),
+				'message' => sprintf( esc_html__( 'EMS Provider "%s" service not found.', 'capture' ), esc_html( $provider_slug ) ),
 				'lists'   => array(),
 			),
 			500
@@ -182,7 +179,7 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => sprintf( esc_html__( 'API key for the EMS connection "%s" is missing or not configured.', 'wp-capture' ), esc_html( $ems_id ) ),
+					'message' => sprintf( esc_html__( 'API key for the EMS connection "%s" is missing or not configured.', 'capture' ), esc_html( $ems_id ) ),
 					'lists'   => array(),
 				),
 				200 // Or 400/500 depending on desired client handling.
@@ -197,7 +194,7 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => esc_html__( 'Could not securely retrieve API key for fetching lists.', 'wp-capture' ),
+					'message' => esc_html__( 'Could not securely retrieve API key for fetching lists.', 'capture' ),
 					'lists'   => array(),
 				),
 				500
@@ -212,7 +209,7 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => esc_html__( 'Failed to decrypt API key for the selected EMS connection.', 'wp-capture' ),
+					'message' => esc_html__( 'Failed to decrypt API key for the selected EMS connection.', 'capture' ),
 					'lists'   => array(),
 				),
 				500
@@ -223,7 +220,7 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 		$lists       = $service->get_lists( $credentials );
 
 		if ( false === $lists || is_wp_error( $lists ) ) {
-			$error_message = is_wp_error( $lists ) ? $lists->get_error_message() : esc_html__( 'Could not retrieve lists from the EMS provider.', 'wp-capture' );
+			$error_message = is_wp_error( $lists ) ? $lists->get_error_message() : esc_html__( 'Could not retrieve lists from the EMS provider.', 'capture' );
 			return new WP_REST_Response(
 				array(
 					'success' => false,
@@ -254,7 +251,7 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 			return new WP_REST_Response(
 				array(
 					'success' => true, // Success, but no lists found.
-					'message' => esc_html__( 'No lists found for the configured EMS provider.', 'wp-capture' ),
+					'message' => esc_html__( 'No lists found for the configured EMS provider.', 'capture' ),
 					'lists'   => array(),
 				),
 				200
@@ -273,10 +270,374 @@ function wp_capture_get_ems_lists_callback( WP_REST_Request $request ) {
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => esc_html__( 'An unexpected error occurred while fetching lists.', 'wp-capture' ),
+				'message' => esc_html__( 'An unexpected error occurred while fetching lists.', 'capture' ),
 				'lists'   => array(),
 			),
 			500
 		);
 	}
+}
+
+/**
+ * Register REST API endpoints for local subscriber management.
+ *
+ * @since 1.0.0
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		// Public endpoint for form submissions
+		register_rest_route(
+			'wp-capture/v1',
+			'/subscribe',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => 'wp_capture_subscribe_callback',
+				'args'                => array(
+					'email' => array(
+						'required'          => true,
+						'type'              => 'string',
+						'description'       => __( 'Email address of the subscriber.', 'capture' ),
+						'sanitize_callback' => 'sanitize_email',
+						'validate_callback' => 'is_email',
+					),
+					'name' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'description'       => __( 'Name of the subscriber.', 'capture' ),
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'form_id' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'description'       => __( 'Form ID that captured this subscriber.', 'capture' ),
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'source_url' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'description'       => __( 'Source URL where subscriber signed up.', 'capture' ),
+						'sanitize_callback' => 'esc_url_raw',
+					),
+				),
+				'permission_callback' => '__return_true', // Public endpoint
+			)
+		);
+
+		// Admin endpoint to get subscribers
+		register_rest_route(
+			'wp-capture/v1',
+			'/admin/subscribers',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => 'wp_capture_get_subscribers_callback',
+				'args'                => array(
+					'per_page' => array(
+						'required'          => false,
+						'type'              => 'integer',
+						'default'           => 20,
+						'sanitize_callback' => 'absint',
+					),
+					'page' => array(
+						'required'          => false,
+						'type'              => 'integer',
+						'default'           => 1,
+						'sanitize_callback' => 'absint',
+					),
+					'search' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'form_id' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'status' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'date_from' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'date_to' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
+			)
+		);
+
+		// Admin endpoint to export subscribers
+		register_rest_route(
+			'wp-capture/v1',
+			'/admin/subscribers/export',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => 'wp_capture_export_subscribers_callback',
+				'args'                => array(
+					'search' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'form_id' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'status' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'date_from' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'date_to' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
+			)
+		);
+
+		// Admin endpoint to delete a subscriber
+		register_rest_route(
+			'wp-capture/v1',
+			'/admin/subscribers/(?P<id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => 'wp_capture_delete_subscriber_callback',
+				'args'                => array(
+					'id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
+			)
+		);
+	}
+);
+
+/**
+ * Callback function for the /subscribe REST API endpoint.
+ *
+ * @since 1.0.0
+ * @param WP_REST_Request $request The request object.
+ * @return WP_REST_Response|WP_Error The response object or WP_Error on failure.
+ */
+function wp_capture_subscribe_callback( WP_REST_Request $request ) {
+	$email = $request->get_param( 'email' );
+	$name = $request->get_param( 'name' );
+	$form_id = $request->get_param( 'form_id' );
+	$source_url = $request->get_param( 'source_url' );
+
+	// Check if local storage is enabled
+	$options = get_option( 'wp_capture_options', array() );
+	if ( isset( $options['enable_local_storage'] ) && ! $options['enable_local_storage'] ) {
+		return new WP_REST_Response(
+			array(
+				'success' => false,
+				'message' => __( 'Local subscriber storage is disabled.', 'capture' ),
+			),
+			400
+		);
+	}
+
+	// Create new subscriber
+	$subscriber = new WP_Capture_Subscriber();
+	$subscriber->email = $email;
+	$subscriber->name = $name;
+	$subscriber->form_id = $form_id;
+	$subscriber->source_url = $source_url;
+	$subscriber->user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_textarea_field( $_SERVER['HTTP_USER_AGENT'] ) : '';
+
+	// Save subscriber
+	$result = $subscriber->save();
+
+	if ( is_wp_error( $result ) ) {
+		$error_code = $result->get_error_code();
+		$status_code = ( $error_code === 'duplicate_subscriber' ) ? 409 : 400;
+		
+		return new WP_REST_Response(
+			array(
+				'success' => false,
+				'message' => $result->get_error_message(),
+			),
+			$status_code
+		);
+	}
+
+	// Get success message from options or use default
+	$success_message = isset( $options['default_success_message'] ) ? $options['default_success_message'] : __( 'Thank you for subscribing!', 'capture' );
+
+	return new WP_REST_Response(
+		array(
+			'success' => true,
+			'message' => $success_message,
+			'subscriber_id' => $result,
+		),
+		201
+	);
+}
+
+/**
+ * Callback function for the /admin/subscribers REST API endpoint.
+ *
+ * @since 1.0.0
+ * @param WP_REST_Request $request The request object.
+ * @return WP_REST_Response|WP_Error The response object or WP_Error on failure.
+ */
+function wp_capture_get_subscribers_callback( WP_REST_Request $request ) {
+	$args = array(
+		'per_page' => $request->get_param( 'per_page' ),
+		'page' => $request->get_param( 'page' ),
+		'search' => $request->get_param( 'search' ),
+		'form_id' => $request->get_param( 'form_id' ),
+		'status' => $request->get_param( 'status' ),
+		'date_from' => $request->get_param( 'date_from' ),
+		'date_to' => $request->get_param( 'date_to' ),
+	);
+
+	// Remove empty values
+	$args = array_filter( $args, function( $value ) {
+		return $value !== null && $value !== '';
+	} );
+
+	$result = WP_Capture_Subscriber::get_subscribers( $args );
+
+	// Convert subscriber objects to arrays for JSON response
+	$subscribers = array();
+	foreach ( $result['subscribers'] as $subscriber ) {
+		$subscribers[] = $subscriber->to_array();
+	}
+
+	return new WP_REST_Response(
+		array(
+			'success' => true,
+			'subscribers' => $subscribers,
+			'total' => $result['total'],
+			'pages' => $result['pages'],
+		),
+		200
+	);
+}
+
+/**
+ * Callback function for the /admin/subscribers/export REST API endpoint.
+ *
+ * @since 1.0.0
+ * @param WP_REST_Request $request The request object.
+ * @return WP_REST_Response|WP_Error The response object or WP_Error on failure.
+ */
+function wp_capture_export_subscribers_callback( WP_REST_Request $request ) {
+	$args = array(
+		'per_page' => -1, // Get all subscribers for export
+		'search' => $request->get_param( 'search' ),
+		'form_id' => $request->get_param( 'form_id' ),
+		'status' => $request->get_param( 'status' ),
+		'date_from' => $request->get_param( 'date_from' ),
+		'date_to' => $request->get_param( 'date_to' ),
+	);
+
+	// Remove empty values
+	$args = array_filter( $args, function( $value ) {
+		return $value !== null && $value !== '';
+	} );
+
+	$result = WP_Capture_Subscriber::get_subscribers( $args );
+
+	// Prepare CSV data
+	$csv_data = array();
+	$csv_data[] = array( 'Email', 'Name', 'Form ID', 'Date Subscribed', 'Status', 'Source URL' );
+
+	foreach ( $result['subscribers'] as $subscriber ) {
+		$csv_data[] = array(
+			$subscriber->email,
+			$subscriber->name,
+			$subscriber->form_id,
+			$subscriber->date_subscribed,
+			$subscriber->status,
+			$subscriber->source_url,
+		);
+	}
+
+	// Generate CSV content
+	$output = '';
+	foreach ( $csv_data as $row ) {
+		$output .= '"' . implode( '","', array_map( 'str_replace', array_fill( 0, count( $row ), '"' ), array_fill( 0, count( $row ), '""' ), $row ) ) . '"' . "\n";
+	}
+
+	// Set headers for CSV download
+	$filename = 'wp-capture-subscribers-' . date( 'Y-m-d' ) . '.csv';
+
+	return new WP_REST_Response(
+		array(
+			'success' => true,
+			'filename' => $filename,
+			'content' => $output,
+			'count' => count( $result['subscribers'] ),
+		),
+		200
+	);
+}
+
+/**
+ * Callback function for the /admin/subscribers/{id} DELETE REST API endpoint.
+ *
+ * @since 1.0.0
+ * @param WP_REST_Request $request The request object.
+ * @return WP_REST_Response|WP_Error The response object or WP_Error on failure.
+ */
+function wp_capture_delete_subscriber_callback( WP_REST_Request $request ) {
+	$id = $request->get_param( 'id' );
+
+	$subscriber = WP_Capture_Subscriber::get_by_id( $id );
+	if ( ! $subscriber ) {
+		return new WP_REST_Response(
+			array(
+				'success' => false,
+				'message' => __( 'Subscriber not found.', 'capture' ),
+			),
+			404
+		);
+	}
+
+	$deleted = $subscriber->delete();
+	if ( ! $deleted ) {
+		return new WP_REST_Response(
+			array(
+				'success' => false,
+				'message' => __( 'Failed to delete subscriber.', 'capture' ),
+			),
+			500
+		);
+	}
+
+	return new WP_REST_Response(
+		array(
+			'success' => true,
+			'message' => __( 'Subscriber deleted successfully.', 'capture' ),
+		),
+		200
+	);
 }

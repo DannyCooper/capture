@@ -8,7 +8,7 @@
   \****************************************/
 /***/ ((module) => {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"capture/form","version":"0.1.0","title":"Capture Form","category":"widgets","icon":"capture","description":"A simple email capture form block with a button.","attributes":{"emsConnectionId":{"type":"string","default":""},"selectedListId":{"type":"string","default":""},"formId":{"type":"string","default":""},"formLayout":{"type":"string","default":"stack"},"successMessage":{"type":"string","default":""},"fieldGap":{"type":"number","default":""},"showNameField":{"type":"boolean","default":false},"buttonText":{"type":"string","default":"Subscribe"},"buttonColor":{"type":"string","default":""},"buttonTextColor":{"type":"string","default":""},"buttonHoverColor":{"type":"string","default":""}},"supports":{"html":true,"multiple":false,"background":{"backgroundImage":true,"backgroundSize":true},"spacing":{"margin":true,"padding":true}},"textdomain":"wp-capture","editorScript":"file:.//index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"wp-capture-form-frontend","render":"file:./render.php"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"capture/form","version":"0.1.0","title":"Capture Form","category":"widgets","icon":"capture","description":"A simple email capture form block with a button.","attributes":{"emsConnectionId":{"type":"string","default":""},"selectedListId":{"type":"string","default":""},"formId":{"type":"string","default":""},"formLayout":{"type":"string","default":"stack"},"successMessage":{"type":"string","default":""},"fieldGap":{"type":"number","default":"1"},"showNameField":{"type":"boolean","default":false},"buttonText":{"type":"string","default":"Subscribe"},"buttonColor":{"type":"string","default":""},"buttonTextColor":{"type":"string","default":""},"buttonHoverColor":{"type":"string","default":""}},"supports":{"html":true,"multiple":false,"background":{"backgroundImage":true,"backgroundSize":true},"spacing":{"margin":true,"padding":true}},"textdomain":"capture","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"wp-capture-form-frontend","render":"file:./render.php"}');
 
 /***/ }),
 
@@ -188,8 +188,6 @@ function Edit({
   const buttonStyles = {
     backgroundColor: buttonColor,
     color: buttonTextColor,
-    // Add other button styling here if needed (padding, border, etc.)
-    padding: '10px 15px',
     border: 'none',
     cursor: 'pointer'
   };
@@ -241,6 +239,23 @@ function Edit({
           options: emsProviders,
           onChange: handleProviderChange,
           help: emsProviders.length <= 1 && !providersError ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No EMS providers configured. Please add one in plugin settings.', 'wp-capture') : ''
+        }), !emsConnectionId && (emsProviders.length <= 1 || !providersError) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
+          className: "wp-capture-local-notice",
+          style: {
+            padding: '10px',
+            backgroundColor: '#f0f0f0',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            marginTop: '10px'
+          },
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
+            style: {
+              margin: 0,
+              fontSize: '14px',
+              color: '#666'
+            },
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('ℹ️ No EMS provider selected. Subscribers will be stored locally in your WordPress database.', 'wp-capture')
+          })
         }), emsConnectionId && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
           children: isLoadingLists ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, {}) : listsError ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Placeholder, {
             icon: "warning",

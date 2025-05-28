@@ -1,0 +1,52 @@
+.wp-block-capture-form {
+
+    .capture-form {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column;
+        gap: 1rem;
+
+        &--inline {
+            display: flex;
+            flex-direction: row;
+        }
+
+        &--stacked {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+    .capture-form__input,
+    .capture-form__input--email,
+    .capture-form__input--name,
+    .capture-form__button {
+        margin: 0;
+        padding: 1rem;
+        font-size: 1rem;
+        line-height: normal;
+    }
+
+	.capture-form__button {
+		background: #0073aa;
+		color: white;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+        flex: none;
+
+		&:hover {
+			background: #005177;
+		}
+	}
+}
+
+@media (max-width: 1024px) {
+    .wp-block-capture-form {
+        .capture-form {
+            &--inline {
+                flex-direction: column;
+            }
+        }
+    }
+}

@@ -11,6 +11,10 @@ import {
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import FormPreview from './components/FormPreview';
 
+import './index.scss';
+
+
+
 // Debug logging
 const debug = (message, data) => {
     if (process.env.NODE_ENV === 'development') {
@@ -20,6 +24,11 @@ const debug = (message, data) => {
 
 registerBlockType('capture/form-embed', {
     edit: function Edit({ attributes, setAttributes }) {
+
+        if(attributes._previewMode){
+            return <h1>Preview Mode</h1>
+        }
+
         const blockProps = useBlockProps();
         const { formId } = attributes;
 

@@ -14,11 +14,19 @@
     "formId": {
       "type": "number",
       "default": null
-    }
+    },
+    "_previewMode": {
+			"type": "boolean",
+			"default": false
+		}
   },
+  "example": {
+		"attributes": {
+			"_previewMode": true
+		}
+	},
   "textdomain": "capture",
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
-  "style": "file:./style-index.css",
   "render": "file:./render.php"
 }

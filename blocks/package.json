@@ -5,13 +5,13 @@
   "description": "Manages blocks for the Capture plugin.",
   "main": "index.js",
   "scripts": {
-    "build": "wp-scripts build",
+    "build": "wp-scripts build ",
     "start": "wp-scripts start",
     "check-engines": "wp-scripts check-engines",
     "check-licenses": "wp-scripts check-licenses",
-    "format": "wp-scripts format ./blocks/**/*.{js,ts,tsx,json,css,scss,md}",
-    "lint:css": "wp-scripts lint-style ./blocks/**/*.{css,scss}",
-    "lint:js": "wp-scripts lint-js ./blocks/**/*.{js,ts,tsx}",
+    "format": "wp-scripts format ./src/**/*.{js,ts,tsx,json,css,scss,md}",
+    "lint:css": "wp-scripts lint-style ./src/**/*.{css,scss} --fix",
+    "lint:js": "wp-scripts lint-js ./src/**/*.{js,ts,tsx}",
     "lint:md:docs": "wp-scripts lint-md-docs",
     "lint:pkg-json": "wp-scripts lint-pkg-json",
     "packages-update": "wp-scripts packages-update"
