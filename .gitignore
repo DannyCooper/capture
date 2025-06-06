@@ -1,2 +1,41 @@
+# Development and build files
 linter.txt
 test-email-template.php
+
+# Composer dependencies
+vendor/
+composer.lock
+
+# PHPUnit and testing
+.phpunit.result.cache
+phpunit.xml.local
+tests/coverage/
+tests/reports/
+.phpunit.cache/
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+error_log
+debug.log
+
+# WordPress specific
+wp-config-local.php
+.htaccess.local
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Temporary files
+*.tmp
+*.temp
