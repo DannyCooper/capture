@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "capture/form-embed",
+  "version": "1.0.0",
+  "title": "Form Embed",
+  "category": "widgets",
+  "icon": "forms",
+  "description": "Embed a form from the Forms library!",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "formId": {
+      "type": "number",
+      "default": null
+    },
+    "_previewMode": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "example": {
+    "attributes": {
+      "_previewMode": true
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "render": "file:./render.php"
+}

@@ -1,0 +1,60 @@
+/*!*******************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/wp-capture-form/style.scss ***!
+  \*******************************************************************************************************************************************************************************************************************************************************/
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  gap: 1rem;
+}
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form--inline {
+  display: flex;
+  flex-direction: row;
+}
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form--stacked {
+  display: flex;
+  flex-direction: column;
+}
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form__input,
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form__input--email,
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form__input--name,
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form__button {
+  margin: 0;
+  padding: 1rem;
+  font-size: 1rem;
+  line-height: normal;
+}
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form__button {
+  background: #0073aa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: none;
+}
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form__button:hover {
+  background: #005177;
+}
+.wp-block-capture-form:not(.capture-form--no-core-styles) .capture-form__privacy-policy {
+  font-size: 0.7em;
+  text-align: center;
+  color: #666;
+  display: block;
+  margin-top: 0.7rem;
+}
+
+.capture-form__error {
+  border: 2px solid red;
+  padding: 1rem;
+  background: #ffe3e3;
+  border-radius: 4px;
+  text-align: center;
+  color: #8a0000;
+}
+
+@media (max-width: 1024px) {
+  .wp-block-capture-form .capture-form--inline {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "capture/form",
+  "version": "0.1.0",
+  "title": "Capture Form",
+  "category": "widgets",
+  "icon": "capture",
+  "description": "A simple email capture form block with a button.",
+  "attributes": {
+    "emsConnectionId": {
+      "type": "string",
+      "default": ""
+    },
+    "selectedListId": {
+      "type": "string",
+      "default": ""
+    },
+    "formId": {
+      "type": "string",
+      "default": ""
+    },
+    "formLayout": {
+      "type": "string",
+      "default": "stacked"
+    },
+    "successMessage": {
+      "type": "string",
+      "default": ""
+    },
+    "fieldGap": {
+      "type": "number",
+      "default": "1"
+    },
+    "showNameField": {
+      "type": "boolean",
+      "default": false
+    },
+    "showPrivacyPolicy": {
+      "type": "boolean",
+      "default": false
+    },
+    "disableCoreStyles": {
+      "type": "boolean",
+      "default": false
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Subscribe"
+    },
+    "buttonColor": {
+      "type": "string",
+      "default": ""
+    },
+    "buttonTextColor": {
+      "type": "string",
+      "default": ""
+    },
+    "buttonHoverColor": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": true,
+    "multiple": true,
+    "background": {
+      "backgroundImage": true,
+      "backgroundSize": true
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "capture-form-frontend",
+  "render": "file:./render.php"
+}
