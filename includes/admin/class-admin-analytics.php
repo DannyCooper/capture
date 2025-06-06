@@ -2,23 +2,20 @@
 /**
  * Handles the analytics page for WP Capture.
  *
- * @package    WP_Capture
- * @subpackage WP_Capture/includes/admin
+ * @package    Capture
+ * @subpackage Capture/includes/admin
  */
+
+namespace Capture;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-class WP_Capture_Admin_Analytics {
-
-	private $plugin;
-	private $main_admin; // Reference to WP_Capture_Admin
-
-	public function __construct( WP_Capture $plugin, WP_Capture_Admin $main_admin ) {
-		$this->plugin     = $plugin;
-		$this->main_admin = $main_admin;
-	}
+/**
+ * Admin_Analytics class.
+ */
+class Admin_Analytics {
 
 	/**
 	 * Render the Analytics page.
@@ -37,25 +34,24 @@ class WP_Capture_Admin_Analytics {
 	 * Callback for rendering the analytics table.
 	 */
 	public function analytics_table_callback() {
-		$analytics_data = get_option( 'wp_capture_analytics_data', array() );
+		$analytics_data = get_option( 'capture_analytics', array() );
 
 		if ( empty( $analytics_data ) ) {
-			echo '<p>' . __( 'No submission data yet.', 'capture' ) . '</p>';
+			echo '<p>' . esc_html__( 'No submission data yet.', 'capture' ) . '</p>';
 			return;
 		}
 
 		echo '<table class="wp-list-table widefat striped fixed">';
 		echo '<thead><tr>';
-		echo '<th scope="col">' . __( 'Page/Post Title', 'capture' ) . '</th>';
-		echo '<th scope="col">' . __( 'Form Identifier', 'capture' ) . '</th>';
-		echo '<th scope="col">' . __( 'Submissions', 'capture' ) . '</th>';
-		echo '<th scope="col">' . __( 'Last Submission', 'capture' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Page/Post Title', 'capture' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Form Identifier', 'capture' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Submissions', 'capture' ) . '</th>';
+		echo '<th scope="col">' . esc_html__( 'Last Submission', 'capture' ) . '</th>';
 		echo '</tr></thead>';
 		echo '<tbody>';
 
 		foreach ( $analytics_data as $form_id => $data ) {
-			$post_id = isset( $data['post_id'] ) ? intval( $data['post_id'] ) : 0;
-			// $post_title = isset($data['post_title']) ? esc_html($data['post_title']) : __('N/A', 'capture'); // Keep original logic for deleted posts
+			$post_id                   = isset( $data['post_id'] ) ? intval( $data['post_id'] ) : 0;
 			$count                     = isset( $data['count'] ) ? intval( $data['count'] ) : 0;
 			$last_submission_timestamp = isset( $data['last_submission_timestamp'] ) ? $data['last_submission_timestamp'] : 0;
 			$form_identifier_display   = esc_html( substr( $form_id, 0, 12 ) . ( strlen( $form_id ) > 12 ? '...' : '' ) );
@@ -80,18 +76,19 @@ class WP_Capture_Admin_Analytics {
 			}
 
 			echo '<tr>';
-			echo '<td>' . $title_display . '</td>'; // Already escaped or contains HTML
-			echo '<td>' . $form_identifier_display . '</td>';
-			echo '<td>' . $count . '</td>';
+			echo '<td>' . wp_kses_post( $title_display ) . '</td>';
+			echo '<td>' . esc_html( $form_identifier_display ) . '</td>';
+			echo '<td><a href="' . esc_url( admin_url( 'admin.php?page=capture-subscribers&form_id=' . $form_id ) ) . '">' . absint( $count ) . '</a></td>';
 			echo '<td>';
 			if ( $last_submission_timestamp > 0 ) {
 				printf(
+					/* translators: 1: Date, 2: Time */
 					esc_html__( '%1$s at %2$s', 'capture' ),
-					wp_date( get_option( 'date_format' ), $last_submission_timestamp ),
-					wp_date( get_option( 'time_format' ), $last_submission_timestamp )
+					esc_html( wp_date( get_option( 'date_format' ), $last_submission_timestamp ) ),
+					esc_html( wp_date( get_option( 'time_format' ), $last_submission_timestamp ) )
 				);
 			} else {
-				echo __( 'N/A', 'capture' );
+				echo esc_html__( 'N/A', 'capture' );
 			}
 			echo '</td>';
 			echo '</tr>';
@@ -99,11 +96,4 @@ class WP_Capture_Admin_Analytics {
 
 		echo '</tbody></table>';
 	}
-
-	/**
-	 * Print the Section text for Analytics (if used in a settings page context, not directly used here)
-	 */
-	// public function analytics_section_callback() {
-	// echo '<p>' . __('View submission analytics for your forms.', 'capture') . '</p>';
-	// }
 }

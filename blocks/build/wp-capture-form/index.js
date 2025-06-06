@@ -2,13 +2,287 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/wp-capture-form/FormInspectorControls.js":
+/*!******************************************************!*\
+  !*** ./src/wp-capture-form/FormInspectorControls.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ FormInspectorControls)
+/* harmony export */ });
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__);
+
+
+
+
+function FormInspectorControls({
+  attributes,
+  setAttributes,
+  emsProviders,
+  isLoadingProviders,
+  providersError,
+  emsLists,
+  isLoadingLists,
+  listsError,
+  optionsFromAPI
+}) {
+  const {
+    emsConnectionId,
+    selectedListId,
+    formId,
+    formLayout,
+    successMessage,
+    fieldGap,
+    showNameField,
+    showPrivacyPolicy,
+    buttonColor,
+    buttonTextColor,
+    buttonHoverColor,
+    disableCoreStyles
+  } = attributes;
+
+  // Handle provider change - clear both connection and selected list
+  const handleProviderChange = newConnectionId => {
+    setAttributes({
+      emsConnectionId: newConnectionId,
+      selectedListId: ''
+    });
+  };
+
+  // Define the color settings for the panel
+  const colorSettings = [{
+    value: buttonTextColor,
+    onChange: value => setAttributes({
+      buttonTextColor: value
+    }),
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Text Color', 'capture')
+  }, {
+    value: buttonColor,
+    onChange: value => setAttributes({
+      buttonColor: value
+    }),
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Background Color', 'capture')
+  }, {
+    value: buttonHoverColor,
+    onChange: value => setAttributes({
+      buttonHoverColor: value
+    }),
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Background Hover Color', 'capture')
+  }];
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Settings', 'capture'),
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Show Name Field', 'capture'),
+          checked: showNameField,
+          onChange: newShowNameField => setAttributes({
+            showNameField: newShowNameField
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Show Privacy Policy', 'capture'),
+          checked: showPrivacyPolicy,
+          onChange: newShowPrivacyPolicy => setAttributes({
+            showPrivacyPolicy: newShowPrivacyPolicy
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form ID', 'capture'),
+          value: formId || '',
+          onChange: newFormId => setAttributes({
+            formId: newFormId
+          }),
+          help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Changing this allows you to track the success of this form.', 'capture')
+        }), isLoadingProviders ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, {}) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select EMS Provider', 'capture'),
+          value: emsConnectionId,
+          options: emsProviders,
+          onChange: handleProviderChange
+        }), !emsConnectionId && (emsProviders.length <= 1 || !providersError) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+          className: "capture-local-notice",
+          style: {
+            padding: '10px',
+            backgroundColor: '#f0f0f0',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            marginTop: '-8px',
+            marginBottom: '16px'
+          },
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("p", {
+            style: {
+              margin: 0
+            },
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('ℹ️ No EMS provider selected. Subscribers will be stored locally in your WordPress database.', 'capture')
+          })
+        }), emsConnectionId && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
+          children: isLoadingLists ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, {}) : listsError ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Placeholder, {
+            icon: "warning",
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('EMS Lists', 'capture'),
+            children: listsError
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select List', 'capture'),
+            value: selectedListId,
+            options: emsLists,
+            onChange: newListId => setAttributes({
+              selectedListId: newListId
+            }),
+            disabled: emsLists.length <= 1 && !listsError && !isLoadingLists,
+            help: emsLists.length <= 1 && !listsError && !isLoadingLists ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No lists available for this provider or select a provider.', 'capture') : ''
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextareaControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Success Message', 'capture'),
+          value: successMessage || optionsFromAPI?.default_success_message,
+          onChange: newSuccessMessage => setAttributes({
+            successMessage: newSuccessMessage
+          })
+        })]
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
+      group: "advanced",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Disable Core Styles', 'capture'),
+        checked: disableCoreStyles,
+        onChange: newDisableCoreStyles => setAttributes({
+          disableCoreStyles: newDisableCoreStyles
+        })
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
+      group: "styles",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Layout', 'capture'),
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Style', 'capture'),
+          value: formLayout,
+          options: [{
+            label: 'Stacked',
+            value: 'stacked'
+          }, {
+            label: 'Inline',
+            value: 'inline'
+          }],
+          onChange: newStyle => setAttributes({
+            formLayout: newStyle
+          }),
+          help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Stack the form fields or display them inline.', 'capture')
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RangeControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Field Gap (rem)', 'capture'),
+          value: fieldGap,
+          onChange: newFieldGap => setAttributes({
+            fieldGap: newFieldGap
+          }),
+          min: 0,
+          max: 5,
+          step: 0.2,
+          help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Set the gap between form fields', 'capture')
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.PanelColorSettings, {
+        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Button Color Settings', 'capture'),
+        initialOpen: true,
+        colorSettings: colorSettings
+      })]
+    })]
+  });
+}
+
+/***/ }),
+
+/***/ "./src/wp-capture-form/FormPreview.js":
+/*!********************************************!*\
+  !*** ./src/wp-capture-form/FormPreview.js ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ FormPreview)
+/* harmony export */ });
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+function FormPreview({
+  attributes,
+  optionsFromAPI
+}) {
+  const {
+    emsConnectionId,
+    selectedListId,
+    formLayout,
+    fieldGap,
+    showNameField,
+    showPrivacyPolicy,
+    buttonColor,
+    buttonTextColor,
+    disableCoreStyles
+  } = attributes;
+  const blockProps = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps)({
+    style: {
+      gap: `${fieldGap}rem`,
+      display: 'flex',
+      flexDirection: formLayout === 'inline' ? 'row' : 'column'
+    },
+    className: `capture-form capture-form--${formLayout} ${disableCoreStyles ? 'capture-form--no-core-styles' : ''}`
+  });
+  const buttonStyles = {
+    backgroundColor: buttonColor,
+    color: buttonTextColor,
+    border: 'none',
+    cursor: 'pointer'
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+    ...blockProps,
+    children: [emsConnectionId && !selectedListId && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      className: "capture-form__error",
+      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Please select a list for the selected EMS connection.', 'capture')
+    }), showNameField && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
+      type: "text",
+      id: blockProps.id + '-name',
+      className: "capture-form__input",
+      placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('First name', 'capture'),
+      readOnly: true
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
+      type: "email",
+      id: blockProps.id + '-email',
+      className: "capture-form__input",
+      placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Email address', 'capture'),
+      readOnly: true
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+      type: "button",
+      className: "capture-form__button",
+      style: buttonStyles,
+      onClick: event => event.preventDefault(),
+      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Subscribe', 'capture')
+    }), showPrivacyPolicy && optionsFromAPI?.privacy_policy_text && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+      dangerouslySetInnerHTML: {
+        __html: optionsFromAPI.privacy_policy_text
+      },
+      className: "capture-form__privacy-policy"
+    })]
+  });
+}
+
+/***/ }),
+
 /***/ "./src/wp-capture-form/block.json":
 /*!****************************************!*\
   !*** ./src/wp-capture-form/block.json ***!
   \****************************************/
 /***/ ((module) => {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"capture/form","version":"0.1.0","title":"Capture Form","category":"widgets","icon":"capture","description":"A simple email capture form block with a button.","attributes":{"emsConnectionId":{"type":"string","default":""},"selectedListId":{"type":"string","default":""},"formId":{"type":"string","default":""},"formLayout":{"type":"string","default":"stack"},"successMessage":{"type":"string","default":""},"fieldGap":{"type":"number","default":"1"},"showNameField":{"type":"boolean","default":false},"buttonText":{"type":"string","default":"Subscribe"},"buttonColor":{"type":"string","default":""},"buttonTextColor":{"type":"string","default":""},"buttonHoverColor":{"type":"string","default":""}},"supports":{"html":true,"multiple":false,"background":{"backgroundImage":true,"backgroundSize":true},"spacing":{"margin":true,"padding":true}},"textdomain":"capture","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"wp-capture-form-frontend","render":"file:./render.php"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"capture/form","version":"0.1.0","title":"Capture Form","category":"widgets","icon":"capture","description":"A simple email capture form block with a button.","attributes":{"emsConnectionId":{"type":"string","default":""},"selectedListId":{"type":"string","default":""},"formId":{"type":"string","default":""},"formLayout":{"type":"string","default":"stacked"},"successMessage":{"type":"string","default":""},"fieldGap":{"type":"number","default":"1"},"showNameField":{"type":"boolean","default":false},"showPrivacyPolicy":{"type":"boolean","default":false},"disableCoreStyles":{"type":"boolean","default":false},"buttonText":{"type":"string","default":"Subscribe"},"buttonColor":{"type":"string","default":""},"buttonTextColor":{"type":"string","default":""},"buttonHoverColor":{"type":"string","default":""}},"supports":{"html":true,"multiple":true,"background":{"backgroundImage":true,"backgroundSize":true},"spacing":{"margin":true,"padding":true}},"editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"capture-form-frontend","render":"file:./render.php"}');
 
 /***/ }),
 
@@ -24,14 +298,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
-/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
-/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _FormInspectorControls__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./FormInspectorControls */ "./src/wp-capture-form/FormInspectorControls.js");
+/* harmony import */ var _FormPreview__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./FormPreview */ "./src/wp-capture-form/FormPreview.js");
+/* harmony import */ var _hooks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./hooks */ "./src/wp-capture-form/hooks/index.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__);
 
@@ -47,20 +318,11 @@ function Edit({
 }) {
   const {
     emsConnectionId,
-    selectedListId,
-    formId,
-    formLayout,
-    successMessage,
-    fieldGap,
-    showNameField,
-    buttonText,
-    buttonColor,
-    buttonTextColor,
-    buttonHoverColor
+    formId
   } = attributes;
 
   // Effect to set formId from clientId
-  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
     if (clientId && !formId) {
       setAttributes({
         formId: clientId
@@ -68,272 +330,51 @@ function Edit({
     }
   }, [clientId, formId, setAttributes]);
 
-  // State for EMS Providers
-  const [emsProviders, setEmsProviders] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
-  const [isLoadingProviders, setIsLoadingProviders] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(true);
-  const [providersError, setProvidersError] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(null);
+  // Use custom hooks for data fetching
+  const {
+    optionsFromAPI,
+    isLoadingOptions
+  } = (0,_hooks__WEBPACK_IMPORTED_MODULE_4__.usePluginOptions)();
+  const {
+    emsProviders,
+    isLoadingProviders,
+    providersError,
+    validateConnectionExists
+  } = (0,_hooks__WEBPACK_IMPORTED_MODULE_4__.useEmsProviders)();
 
-  // State for EMS Lists
-  const [emsLists, setEmsLists] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
-  const [isLoadingLists, setIsLoadingLists] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(false);
-  const [listsError, setListsError] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(null);
+  // Determine if we should fetch lists: either no connection (empty string) or valid connection
+  const shouldFetchLists = !emsConnectionId || validateConnectionExists(emsConnectionId);
+  const {
+    emsLists,
+    isLoadingLists,
+    listsError
+  } = (0,_hooks__WEBPACK_IMPORTED_MODULE_4__.useEmsLists)(emsConnectionId, shouldFetchLists);
 
-  // Effect to fetch EMS Providers on mount
-  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
-    setIsLoadingProviders(true);
-    setProvidersError(null);
-    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default()({
-      path: '/wp-capture/v1/get-ems-providers/'
-    }).then(response => {
-      if (response.success && response.providers) {
-        const selectOptions = response.providers.map(provider => ({
-          label: provider.label,
-          value: provider.value
-        }));
-        setEmsProviders([{
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select an EMS Provider', 'wp-capture'),
-          value: ''
-        }, ...selectOptions]);
-        if (response.providers.length === 0 && response.message) {
-          setProvidersError(response.message);
-        }
-      } else {
-        setProvidersError(response.message || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Failed to load EMS providers.', 'wp-capture'));
-        setEmsProviders([{
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select an EMS Provider', 'wp-capture'),
-          value: ''
-        }]);
-      }
-      setIsLoadingProviders(false);
-    }).catch(err => {
-      console.error('Error fetching EMS providers:', err);
-      setProvidersError((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('An error occurred while fetching EMS providers.', 'wp-capture'));
-      setEmsProviders([{
-        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select an EMS Provider', 'wp-capture'),
-        value: ''
-      }]);
-      setIsLoadingProviders(false);
-    });
-  }, []);
-
-  // Effect to fetch EMS Lists when emsConnectionId changes
-  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
-    if (emsConnectionId) {
-      setIsLoadingLists(true);
-      setListsError(null);
-      setEmsLists([{
-        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Loading lists...', 'wp-capture'),
-        value: ''
-      }]);
-      _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default()({
-        path: `/wp-capture/v1/get-ems-lists/?ems_id=${emsConnectionId}`
-      }).then(response => {
-        if (response.success && response.lists) {
-          const selectOptions = response.lists.map(list => ({
-            label: list.label,
-            value: list.value
-          }));
-          setEmsLists([{
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a List', 'wp-capture'),
-            value: ''
-          }, ...selectOptions]);
-          if (response.lists.length === 0 && response.message) {
-            setListsError(response.message);
-          }
-        } else {
-          setListsError(response.message || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Failed to load lists for the selected provider.', 'wp-capture'));
-          setEmsLists([{
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a List', 'wp-capture'),
-            value: ''
-          }]);
-        }
-        setIsLoadingLists(false);
-      }).catch(err => {
-        console.error('Error fetching EMS lists:', err);
-        setListsError((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('An error occurred while fetching lists.', 'wp-capture'));
-        setEmsLists([{
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a List', 'wp-capture'),
-          value: ''
-        }]);
-        setIsLoadingLists(false);
-      });
-    } else {
-      setEmsLists([{
-        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a provider first', 'wp-capture'),
-        value: ''
-      }]);
+  // Effect to validate selected connection ID when providers have finished loading
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+    // Only validate after providers have loaded
+    if (!isLoadingProviders && emsConnectionId && !validateConnectionExists(emsConnectionId)) {
+      // Clear the connection ID and selected list if the connection no longer exists
       setAttributes({
+        emsConnectionId: '',
         selectedListId: ''
       });
-      setIsLoadingLists(false);
-      setListsError(null);
     }
-  }, [emsConnectionId, setAttributes]);
-  const handleProviderChange = newConnectionId => {
-    setAttributes({
-      emsConnectionId: newConnectionId,
-      selectedListId: ''
-    });
-  };
-  const blockProps = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps)({
-    style: {
-      gap: `${fieldGap}rem`,
-      display: 'flex',
-      flexDirection: formLayout === 'inline' ? 'row' : 'column'
-    },
-    className: `capture-form capture-form--${formLayout}`
-  });
-
-  // Styles for the button, can be applied directly or via CSS variables
-  const buttonStyles = {
-    backgroundColor: buttonColor,
-    color: buttonTextColor,
-    border: 'none',
-    cursor: 'pointer'
-  };
-
-  // Define the color settings for the panel
-  const colorSettings = [{
-    value: buttonTextColor,
-    onChange: value => setAttributes({
-      buttonTextColor: value
-    }),
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Text Color', 'wp-capture')
-  }, {
-    value: buttonColor,
-    onChange: value => setAttributes({
-      buttonColor: value
-    }),
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Background Color', 'wp-capture')
-  }, {
-    value: buttonHoverColor,
-    onChange: value => setAttributes({
-      buttonHoverColor: value
-    }),
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Background Hover Color', 'wp-capture')
-  }];
+  }, [emsConnectionId, isLoadingProviders, validateConnectionExists, setAttributes]);
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
-        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Settings', 'wp-capture'),
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Show Name Field', 'wp-capture'),
-          checked: showNameField,
-          onChange: newShowNameField => setAttributes({
-            showNameField: newShowNameField
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form ID', 'wp-capture'),
-          value: formId || '',
-          onChange: newFormId => setAttributes({
-            formId: newFormId
-          }),
-          help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Changing this allows you to track the success of this form.', 'wp-capture')
-        }), isLoadingProviders ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, {}) : providersError ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Placeholder, {
-          icon: "warning",
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('EMS Providers', 'wp-capture'),
-          children: providersError
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select EMS Provider', 'wp-capture'),
-          value: emsConnectionId,
-          options: emsProviders,
-          onChange: handleProviderChange,
-          help: emsProviders.length <= 1 && !providersError ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No EMS providers configured. Please add one in plugin settings.', 'wp-capture') : ''
-        }), !emsConnectionId && (emsProviders.length <= 1 || !providersError) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-          className: "wp-capture-local-notice",
-          style: {
-            padding: '10px',
-            backgroundColor: '#f0f0f0',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            marginTop: '10px'
-          },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            style: {
-              margin: 0,
-              fontSize: '14px',
-              color: '#666'
-            },
-            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('ℹ️ No EMS provider selected. Subscribers will be stored locally in your WordPress database.', 'wp-capture')
-          })
-        }), emsConnectionId && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
-          children: isLoadingLists ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, {}) : listsError ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Placeholder, {
-            icon: "warning",
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('EMS Lists', 'wp-capture'),
-            children: listsError
-          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select List', 'wp-capture'),
-            value: selectedListId,
-            options: emsLists,
-            onChange: newListId => setAttributes({
-              selectedListId: newListId
-            }),
-            disabled: emsLists.length <= 1 && !listsError && !isLoadingLists,
-            help: emsLists.length <= 1 && !listsError && !isLoadingLists ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No lists available for this provider or select a provider.', 'wp-capture') : ''
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextareaControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Success Message', 'wp-capture'),
-          value: successMessage,
-          onChange: newSuccessMessage => setAttributes({
-            successMessage: newSuccessMessage
-          })
-        })]
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
-      group: "styles",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
-        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Layout', 'wp-capture'),
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Style', 'wp-capture'),
-          value: formLayout,
-          options: [{
-            label: 'Stacked',
-            value: 'stacked'
-          }, {
-            label: 'Inline',
-            value: 'inline'
-          }],
-          onChange: newStyle => setAttributes({
-            formLayout: newStyle
-          }),
-          help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Stack the form fields or display them inline.', 'wp-capture')
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RangeControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Field Gap (rem)', 'wp-capture'),
-          value: fieldGap,
-          onChange: newFieldGap => setAttributes({
-            fieldGap: newFieldGap
-          }),
-          min: 0,
-          max: 5,
-          step: 0.2,
-          help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Set the gap between form fields', 'wp-capture')
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.PanelColorSettings, {
-        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Button Color Settings', 'wp-capture'),
-        initialOpen: true,
-        colorSettings: colorSettings
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      ...blockProps,
-      children: [showNameField && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("input", {
-        type: "text",
-        id: blockProps.id + '-name',
-        className: "capture-form__input",
-        placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('First name', 'wp-capture'),
-        readOnly: true
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("input", {
-        type: "email",
-        id: blockProps.id + '-email',
-        className: "capture-form__input",
-        placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Email address', 'wp-capture'),
-        readOnly: true
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("button", {
-        type: "button",
-        className: "capture-form__button",
-        style: buttonStyles,
-        onClick: event => event.preventDefault(),
-        children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Subscribe', 'wp-capture')
-      })]
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_FormInspectorControls__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      attributes: attributes,
+      setAttributes: setAttributes,
+      emsProviders: emsProviders,
+      isLoadingProviders: isLoadingProviders,
+      providersError: providersError,
+      emsLists: emsLists,
+      isLoadingLists: isLoadingLists,
+      listsError: listsError,
+      optionsFromAPI: optionsFromAPI
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_FormPreview__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      attributes: attributes,
+      optionsFromAPI: optionsFromAPI
     })]
   });
 }
@@ -349,6 +390,235 @@ function Edit({
 __webpack_require__.r(__webpack_exports__);
 // extracted by mini-css-extract-plugin
 
+
+/***/ }),
+
+/***/ "./src/wp-capture-form/hooks/index.js":
+/*!********************************************!*\
+  !*** ./src/wp-capture-form/hooks/index.js ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useEmsLists: () => (/* reexport safe */ _useEmsLists__WEBPACK_IMPORTED_MODULE_2__.useEmsLists),
+/* harmony export */   useEmsProviders: () => (/* reexport safe */ _useEmsProviders__WEBPACK_IMPORTED_MODULE_1__.useEmsProviders),
+/* harmony export */   usePluginOptions: () => (/* reexport safe */ _usePluginOptions__WEBPACK_IMPORTED_MODULE_0__.usePluginOptions)
+/* harmony export */ });
+/* harmony import */ var _usePluginOptions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./usePluginOptions */ "./src/wp-capture-form/hooks/usePluginOptions.js");
+/* harmony import */ var _useEmsProviders__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./useEmsProviders */ "./src/wp-capture-form/hooks/useEmsProviders.js");
+/* harmony import */ var _useEmsLists__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./useEmsLists */ "./src/wp-capture-form/hooks/useEmsLists.js");
+
+
+
+
+/***/ }),
+
+/***/ "./src/wp-capture-form/hooks/useEmsLists.js":
+/*!**************************************************!*\
+  !*** ./src/wp-capture-form/hooks/useEmsLists.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useEmsLists: () => (/* binding */ useEmsLists)
+/* harmony export */ });
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+function useEmsLists(emsConnectionId, shouldFetch = true) {
+  const [emsLists, setEmsLists] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
+  const [isLoadingLists, setIsLoadingLists] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
+  const [listsError, setListsError] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
+
+  // Effect to fetch EMS Lists when emsConnectionId changes
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+    if (emsConnectionId && shouldFetch) {
+      setIsLoadingLists(true);
+      setListsError(null);
+      setEmsLists([{
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Loading lists...', 'capture'),
+        value: ''
+      }]);
+      _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
+        path: `/capture/v1/get-ems-lists/?ems_id=${emsConnectionId}`
+      }).then(response => {
+        if (response.success && response.lists) {
+          const selectOptions = response.lists.map(list => ({
+            label: list.label,
+            value: list.value
+          }));
+          setEmsLists([{
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a List', 'capture'),
+            value: ''
+          }, ...selectOptions]);
+          if (response.lists.length === 0 && response.message) {
+            setListsError(response.message);
+          }
+        } else {
+          setListsError(response.message || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Failed to load lists for the selected provider.', 'capture'));
+          setEmsLists([{
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a List', 'capture'),
+            value: ''
+          }]);
+        }
+        setIsLoadingLists(false);
+      }).catch(err => {
+        console.error('Error fetching EMS lists:', err);
+        setListsError((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('An error occurred while fetching lists.', 'capture'));
+        setEmsLists([{
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a List', 'capture'),
+          value: ''
+        }]);
+        setIsLoadingLists(false);
+      });
+    } else {
+      setEmsLists([{
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a provider first', 'capture'),
+        value: ''
+      }]);
+      setIsLoadingLists(false);
+      setListsError(null);
+    }
+  }, [emsConnectionId, shouldFetch]);
+  return {
+    emsLists,
+    isLoadingLists,
+    listsError
+  };
+}
+
+/***/ }),
+
+/***/ "./src/wp-capture-form/hooks/useEmsProviders.js":
+/*!******************************************************!*\
+  !*** ./src/wp-capture-form/hooks/useEmsProviders.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useEmsProviders: () => (/* binding */ useEmsProviders)
+/* harmony export */ });
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+function useEmsProviders() {
+  const [emsProviders, setEmsProviders] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
+  const [isLoadingProviders, setIsLoadingProviders] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(true);
+  const [providersError, setProvidersError] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
+
+  // Effect to fetch EMS Providers on mount
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+    setIsLoadingProviders(true);
+    setProvidersError(null);
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
+      path: '/capture/v1/get-ems-providers/'
+    }).then(response => {
+      if (response.success && response.providers) {
+        const selectOptions = response.providers.map(provider => ({
+          label: provider.label,
+          value: provider.value
+        }));
+        setEmsProviders([{
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select an EMS Provider', 'capture'),
+          value: ''
+        }, ...selectOptions]);
+        if (response.providers.length === 0 && response.message) {
+          setProvidersError(response.message);
+        }
+      } else {
+        setProvidersError(response.message || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Failed to load EMS providers.', 'capture'));
+        setEmsProviders([{
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select an EMS Provider', 'capture'),
+          value: ''
+        }]);
+      }
+      setIsLoadingProviders(false);
+    }).catch(err => {
+      console.error('Error fetching EMS providers:', err);
+      setProvidersError((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('An error occurred while fetching EMS providers.', 'capture'));
+      setEmsProviders([{
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select an EMS Provider', 'capture'),
+        value: ''
+      }]);
+      setIsLoadingProviders(false);
+    });
+  }, []);
+
+  // Function to validate if a connection ID exists in the providers
+  const validateConnectionExists = connectionId => {
+    // Return false for empty connections
+    if (!connectionId) {
+      return false;
+    }
+    // Check if the connection exists in the providers list
+    return emsProviders.some(provider => provider.value === connectionId);
+  };
+  return {
+    emsProviders,
+    isLoadingProviders,
+    providersError,
+    validateConnectionExists
+  };
+}
+
+/***/ }),
+
+/***/ "./src/wp-capture-form/hooks/usePluginOptions.js":
+/*!*******************************************************!*\
+  !*** ./src/wp-capture-form/hooks/usePluginOptions.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   usePluginOptions: () => (/* binding */ usePluginOptions)
+/* harmony export */ });
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1__);
+
+
+function usePluginOptions() {
+  const [optionsFromAPI, setOptionsFromAPI] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+  const [isLoadingOptions, setIsLoadingOptions] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (!isLoadingOptions && !optionsFromAPI) {
+      setIsLoadingOptions(true);
+      _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1___default()({
+        path: '/capture/v1/get-options/'
+      }).then(response => {
+        if (response.success && response.options) {
+          setOptionsFromAPI(response.options);
+        }
+        setIsLoadingOptions(false);
+      }).catch(err => {
+        console.error('Error fetching options:', err);
+        setIsLoadingOptions(false);
+      });
+    }
+  }, [isLoadingOptions, optionsFromAPI]);
+  console.log('Options from API:', optionsFromAPI);
+  return {
+    optionsFromAPI,
+    isLoadingOptions
+  };
+}
 
 /***/ }),
 

@@ -1,4 +1,4 @@
-.wp-block-capture-form {
+.wp-block-capture-form:not(.capture-form--no-core-styles) {
 
     .capture-form {
         display: flex;
@@ -39,6 +39,23 @@
 			background: #005177;
 		}
 	}
+
+	.capture-form__privacy-policy {
+        font-size: 0.7em;
+        text-align: center;
+        color: #666;
+        display: block;
+        margin-top: .7rem;
+	}
+}
+
+.capture-form__error {
+    border: 2px solid red;
+    padding: 1rem;
+    background: #ffe3e3;
+    border-radius: 4px;
+    text-align: center;
+    color: #8a0000;
 }
 
 @media (max-width: 1024px) {

@@ -1,51 +1,77 @@
 <?php
 /**
- * Test script for WP Capture subscriber email functionality
- * 
- * This file can be run to test email template processing
- * Run from WordPress admin or via WP-CLI
+ * Test email template processing functionality
+ *
+ * @package Capture
  */
 
-// Ensure this is run in WordPress context
-if ( ! defined( 'ABSPATH' ) ) {
-	echo "This script must be run within WordPress context.\n";
-	exit;
+// Try to load WordPress if not already loaded
+if ( ! function_exists( 'get_option' ) ) {
+	// Look for wp-config.php going up directories
+	$wp_config_path = null;
+	$current_dir = dirname( __FILE__ );
+	
+	for ( $i = 0; $i < 10; $i++ ) {
+		if ( file_exists( $current_dir . '/wp-config.php' ) ) {
+			$wp_config_path = $current_dir . '/wp-config.php';
+			break;
+		}
+		$current_dir = dirname( $current_dir );
+	}
+	
+	if ( $wp_config_path ) {
+		// Load WordPress
+		define( 'WP_USE_THEMES', false );
+		require_once $wp_config_path;
+		require_once dirname( $wp_config_path ) . '/wp-load.php';
+	}
 }
 
-// Test data
+require_once 'wp-capture.php';
+
+// Test data.
 $test_subscriber_data = array(
-	'email' => 'test@example.com',
-	'name' => 'John Doe',
-	'form_id' => 'test-form-123',
-	'user_agent' => 'Test User Agent',
-	'status' => 'active',
-	'source_url' => 'https://example.com/test-page',
+	'name'  => 'John Doe',
+	'email' => 'john@example.com',
 );
+$test_subscriber_id   = 123;
 
-$test_subscriber_id = 999; // Fake ID for testing
+// Test template.
+$test_template = "Hello {name},\n\nThank you for subscribing!\n\nUnsubscribe: {unsubscribe_url}";
 
-echo "=== WP Capture Email Template Test ===\n\n";
-
-// Test template processing
-$test_template = "Hello {name},\n\nThank you for subscribing!\n\nDetails:\n• Email: {email}\n• Date: {date}\n• Site: {site_name}\n\nUnsubscribe: {unsubscribe_url}";
-
-echo "Template:\n" . $test_template . "\n\n";
-
-// Process template (function should exist after plugin loads)
-if ( function_exists( 'wp_capture_process_email_template' ) ) {
-	$processed = wp_capture_process_email_template( $test_template, $test_subscriber_data, $test_subscriber_id );
-	echo "Processed Result:\n" . $processed . "\n\n";
-	echo "✅ Template processing successful!\n";
-} else {
-	echo "❌ wp_capture_process_email_template function not found. Is the plugin active?\n";
+// Helper function for HTML escaping
+function safe_html( $text ) {
+	if ( function_exists( 'esc_html' ) ) {
+		return esc_html( $text );
+	}
+	return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
 }
 
-// Test settings
-$options = get_option( 'wp_capture_options', array() );
-echo "\nCurrent Settings:\n";
-echo "- Send confirmation emails: " . ( isset( $options['send_subscriber_confirmation'] ) && $options['send_subscriber_confirmation'] ? 'Yes' : 'No' ) . "\n";
-echo "- From name: " . ( isset( $options['subscriber_email_from_name'] ) ? $options['subscriber_email_from_name'] : 'Not set' ) . "\n";
-echo "- From email: " . ( isset( $options['subscriber_email_from_email'] ) ? $options['subscriber_email_from_email'] : 'Not set' ) . "\n";
-echo "- Subject: " . ( isset( $options['subscriber_email_subject'] ) ? $options['subscriber_email_subject'] : 'Not set' ) . "\n";
+echo '<h1>Test Email Template</h1>';
+echo '<h2>Original Template:</h2>';
+echo '<pre>' . safe_html( $test_template ) . '</pre>';
 
-echo "\n=== Test Complete ===\n"; 
+// Check if function exists before calling
+if ( function_exists( '\Capture\process_email_template' ) ) {
+	// Process template.
+	$processed = \Capture\process_email_template( $test_template, $test_subscriber_data, $test_subscriber_id );
+
+	echo '<h2>Processed Template:</h2>';
+	echo '<pre>' . safe_html( $processed ) . '</pre>';
+} else {
+	echo '<h2>Error:</h2>';
+	echo '<p>process_email_template function not found. Make sure WordPress and the Capture plugin are properly loaded.</p>';
+}
+
+// Test current settings if WordPress is loaded
+if ( function_exists( 'get_option' ) ) {
+	$options = get_option( 'capture_options', array() );
+	echo '<h2>Current Email Settings:</h2>';
+	echo '<p>From Name: ' . safe_html( isset( $options['subscriber_email_from_name'] ) ? $options['subscriber_email_from_name'] : 'Not set' ) . '</p>';
+	echo '<p>From Email: ' . safe_html( isset( $options['subscriber_email_from_email'] ) ? $options['subscriber_email_from_email'] : 'Not set' ) . '</p>';
+	echo '<p>Subject: ' . safe_html( isset( $options['subscriber_email_subject'] ) ? $options['subscriber_email_subject'] : 'Not set' ) . '</p>';
+} else {
+	echo '<h2>WordPress Not Loaded</h2>';
+	echo '<p>WordPress functions are not available. Cannot retrieve plugin settings.</p>';
+}
+

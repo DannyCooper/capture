@@ -2,10 +2,30 @@
 /**
  * Mailchimp EMS service implementation.
  *
- * @since      1.0.0
- * @package    WP_Capture
+ * @package Capture
+ * @since   1.0.0
  */
 
+namespace Capture;
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+/**
+ * Mailchimp EMS service implementation.
+ *
+ * @package Capture
+ * @since   1.0.0
+ */
+
+/**
+ * Mailchimp EMS service implementation.
+ *
+ * @since      1.0.0
+ * @package    Capture
+ */
 class Mailchimp_Service implements Ems_Service_Interface {
 	/**
 	 * The Mailchimp API endpoint.
@@ -113,7 +133,7 @@ class Mailchimp_Service implements Ems_Service_Interface {
 					'Authorization' => 'Basic ' . base64_encode( 'anystring:' . $credentials['api_key'] ),
 					'Content-Type'  => 'application/json',
 				),
-				'body'    => json_encode(
+				'body'    => wp_json_encode(
 					array(
 						'email_address' => $email,
 						'status'        => 'subscribed',
@@ -140,10 +160,10 @@ class Mailchimp_Service implements Ems_Service_Interface {
 	/**
 	 * Extract the data center from a Mailchimp API key.
 	 *
-	 * @param string $apiKey The Mailchimp API key.
+	 * @param string $api_key The Mailchimp API key.
 	 * @return string|false The data center or false if invalid.
 	 */
-	private function get_data_center( string $api_key ) {
+	private function get_data_center( string $api_key ): string|false {
 		$parts = explode( '-', $api_key );
 		return count( $parts ) === 2 ? $parts[1] : false;
 	}

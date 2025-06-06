@@ -3,14 +3,13 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         // Hoist frequently used wpCaptureFrontend properties and regex
-        const wpFrontend = typeof wpCaptureFrontend !== 'undefined' ? wpCaptureFrontend : {};
-        const i18n = wpFrontend.i18n || {};
-        const ajaxUrl = wpFrontend.ajaxUrl || null;
-        const nonce = wpFrontend.nonce || null;
+        const frontendConfig = typeof captureFrontend !== 'undefined' ? captureFrontend : {};
+        const i18n = frontendConfig.i18n || {};
+        const ajax_url = frontendConfig.ajax_url || null;
+        const nonce = frontendConfig.nonce || null;
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!ajaxUrl || !nonce) {
-            console.error('WP Capture: AJAX URL or nonce not defined.');
+        if (!ajax_url || !nonce) {
             alert(i18n.configError || 'Form configuration error. Please contact site admin.');
             return; // Stop if essential config is missing
         }
@@ -43,7 +42,7 @@
                 const firstName = form.querySelector('.capture-form__input--name')?.value || '';
                 
                 const formData = new FormData();
-                formData.append('action', 'capture_submit');
+                formData.append('action', 'capture_submit_form');
                 formData.append('nonce', nonce); // Use hoisted nonce
                 formData.append('email', email);
                 formData.append('list_id', listId);
@@ -54,21 +53,30 @@
                 if (emsConnectionId) formData.append('ems_connection_id', emsConnectionId);
 
                 try {
-                    const response = await fetch(ajaxUrl, { // Use hoisted ajaxUrl
+                    const response = await fetch(ajax_url, { // Use hoisted ajaxUrl
                         method: 'POST',
                         body: formData
                     });
 
                     if (!response.ok) {
                         let errorMessage = response.statusText || 'Network response was not ok.';
+                        let serverResponse = '';
+                        
                         try {
-                            // Attempt to parse JSON error response from the server
-                            const errorData = await response.json();
+                            // Try to get the actual response text first
+                            const responseText = await response.text();
+                            serverResponse = responseText;
+                            
+                            // Then try to parse as JSON
+                            const errorData = JSON.parse(responseText);
                             if (errorData && errorData.message) {
                                 errorMessage = errorData.message;
                             }
                         } catch (e) {
-                            // If response isn't JSON or parsing fails, stick with statusText
+                            // If response isn't JSON or parsing fails, use the raw text
+                            if (serverResponse) {
+                                errorMessage += ' Server response: ' + serverResponse;
+                            }
                         }
                         throw new Error(errorMessage);
                     }
@@ -90,11 +98,9 @@
                             emailInput.value = ''; // Clear input on success
                         }
                     } else {
-                        // Handle business logic errors (e.g., email already subscribed)
-                        alert(data.message || i18n.errorMessage || 'An error occurred. Please try again.');
+                        alert(data.data.message || i18n.errorMessage || 'An error occurred. Please try again.');
                     }
                 } catch (error) {
-                    // Handle network errors or errors thrown from the !response.ok block
                     const details = error && error.message ? String(error.message) : 'No additional details.';
                     alert((i18n.fetchError || 'A network error occurred. Please try again.') + ' Details: ' + details);
                 }

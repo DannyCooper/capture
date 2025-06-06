@@ -2,7 +2,7 @@
 /**
  * Server-side rendering of the `capture/form-embed` block.
  *
- * @package WP_Capture
+ * @package Capture
  */
 
 // If this file is called directly, abort.
@@ -18,4 +18,4 @@ if ( ! $form_id ) {
 
 $form = get_post( 3027 );
 
-echo do_blocks( $form->post_content );
+echo wp_kses_post( do_blocks( $form->post_content ) );

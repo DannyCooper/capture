@@ -1,5 +1,5 @@
 {
-    "name": "wp-capture/plugin",
+    "name": "capture/plugin",
     "description": "WordPress Email Capture Plugin",
     "type": "wordpress-plugin",
     "require-dev": {
@@ -8,7 +8,7 @@
         "wp-coding-standards/wpcs": "^2.3"
     },
     "scripts": {
-        "phpcs": "phpcs --standard=WordPress ./includes ./blocks ./wp-capture.php",
-        "phpcbf": "phpcbf --standard=WordPress ./includes ./blocks ./wp-capture.php"
+        "phpcs": "phpcs --standard=WordPress .",
+        "phpcbf": "phpcbf --standard=WordPress ."
     }
 } 

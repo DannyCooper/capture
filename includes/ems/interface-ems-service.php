@@ -3,8 +3,15 @@
  * Interface for EMS service implementations.
  *
  * @since      1.0.0
- * @package    WP_Capture
+ * @package    Capture
  */
+
+namespace Capture;
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
 interface Ems_Service_Interface {
 	/**

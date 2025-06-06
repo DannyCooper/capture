@@ -2,17 +2,23 @@
 /**
  * Database management for WP Capture plugin.
  *
- * @package WP_Capture
- * @since 1.0.0
+ * This file contains the Database class which handles all database operations
+ * for the WP Capture plugin including table creation and management.
+ *
+ * @since      1.0.0
+ * @package    Capture
+ * @subpackage Capture/includes
  */
+
+namespace Capture;
 
 /**
  * Database management for WP Capture plugin.
  *
  * @since      1.0.0
- * @package    WP_Capture
+ * @package    Capture
  */
-class WP_Capture_Database {
+class Database {
 
 	/**
 	 * Create the subscribers table.
@@ -33,7 +39,7 @@ class WP_Capture_Database {
 			form_id VARCHAR(255) DEFAULT NULL,
 			date_subscribed DATETIME DEFAULT CURRENT_TIMESTAMP,
 			user_agent TEXT DEFAULT NULL,
-			status ENUM('active', 'unsubscribed') DEFAULT 'active',
+			status ENUM('subscribed', 'unsubscribed') DEFAULT 'subscribed',
 			source_url TEXT DEFAULT NULL,
 			UNIQUE KEY unique_email_form (email, form_id),
 			INDEX idx_email (email),
@@ -42,11 +48,11 @@ class WP_Capture_Database {
 			INDEX idx_status (status)
 		) $charset_collate;";
 
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		dbDelta( $sql );
+		require_once \ABSPATH . 'wp-admin/includes/upgrade.php';
+		\dbDelta( $sql );
 
 		// Store the database version for future migrations.
-		add_option( 'wp_capture_db_version', '1.0.0' );
+		\add_option( 'capture_db_version', '1.0.0' );
 	}
 
 	/**
@@ -81,6 +87,6 @@ class WP_Capture_Database {
 		global $wpdb;
 		$table_name = self::get_subscribers_table_name();
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %s', $table_name ) );
-		delete_option( 'wp_capture_db_version' );
+		\delete_option( 'capture_db_version' );
 	}
-} 
+}

@@ -22,7 +22,7 @@
     },
     "formLayout": {
       "type": "string",
-      "default": "stack"
+      "default": "stacked"
     },
     "successMessage": {
       "type": "string",
@@ -33,6 +33,14 @@
       "default": "1"
     },
     "showNameField": {
+      "type": "boolean",
+      "default": false
+    },
+    "showPrivacyPolicy": {
+      "type": "boolean",
+      "default": false
+    },
+    "disableCoreStyles": {
       "type": "boolean",
       "default": false
     },
@@ -55,7 +63,7 @@
   },
   "supports": {
     "html": true,
-    "multiple": false,
+    "multiple": true,
     "background": {
       "backgroundImage": true,
       "backgroundSize": true
@@ -65,10 +73,9 @@
       "padding": true
     }
   },
-  "textdomain": "capture",
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css",
-  "viewScript": "wp-capture-form-frontend",
+  "viewScript": "capture-form-frontend",
   "render": "file:./render.php"
 }

@@ -2,8 +2,10 @@
 /**
  * Handles the registration of custom post types for the WP Capture plugin.
  *
- * @package WP_Capture
+ * @package Capture
  */
+
+namespace Capture;
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
@@ -11,9 +13,9 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class WP_Capture_Post_Types
+ * Class Post_Types
  */
-class WP_Capture_Post_Types {
+class Post_Types {
 
 	/**
 	 * Initialize the class.
@@ -27,9 +29,9 @@ class WP_Capture_Post_Types {
 	 */
 	public function register_post_types() {
 		$labels = array(
-			'name'                  => _x( 'Forms', 'Post type general name', 'capture' ),
+			'name'                  => _x( 'Capture Forms', 'Post type general name', 'capture' ),
 			'singular_name'         => _x( 'Form', 'Post type singular name', 'capture' ),
-			'menu_name'             => _x( 'Forms', 'Admin Menu text', 'capture' ),
+			'menu_name'             => _x( 'Capture Builder', 'Admin Menu text', 'capture' ),
 			'name_admin_bar'        => _x( 'Form', 'Add New on Toolbar', 'capture' ),
 			'add_new'               => __( 'Add New', 'capture' ),
 			'add_new_item'          => __( 'Add New Form', 'capture' ),
@@ -67,4 +69,4 @@ class WP_Capture_Post_Types {
 	}
 }
 
-new WP_Capture_Post_Types();
+new Post_Types();

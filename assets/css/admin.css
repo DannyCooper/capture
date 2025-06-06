@@ -1,37 +1,37 @@
 /* WP Capture Admin Styles */
-.wp-capture-connection-item {
+.capture-connection-item {
     border: 1px solid #ccd0d4;
     padding: 15px;
     margin-bottom: 15px;
     background-color: #fff;
 }
 
-.wp-capture-connection-item hr {
+.capture-connection-item hr {
     margin-top: 20px;
     margin-bottom: 10px;
     border-color: #eee;
 }
 
-.wp-capture-connection-item.is-new {
+.capture-connection-item.is-new {
     border-left: 3px solid #007cba; /* Blue for new items */
 }
 
-.wp-capture-connection-item h4 {
+.capture-connection-item h4 {
     margin-top: 0;
 }
 
-.wp-capture-connection-item label {
+.capture-connection-item label {
     font-weight: bold;
     display: inline-block;
     margin-bottom: 5px;
 }
 
-.wp-capture-connection-item input[type="text"],
-.wp-capture-connection-item select {
+.capture-connection-item input[type="text"],
+.capture-connection-item select {
     width: 100%;
     max-width: 400px;
 }
 
-#wp-capture-connections-wrapper + #wp-capture-add-new-connection {
+#capture-connections-wrapper + #capture-add-new-connection {
     margin-top: 10px;
 } 

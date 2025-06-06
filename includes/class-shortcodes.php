@@ -2,8 +2,10 @@
 /**
  * Handles shortcode registration and processing for the WP Capture plugin.
  *
- * @package WP_Capture
+ * @package Capture
  */
+
+namespace Capture;
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
@@ -11,9 +13,9 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class WP_Capture_Shortcodes
+ * Class Shortcodes
  */
-class WP_Capture_Shortcodes {
+class Shortcodes {
 
 	/**
 	 * Initialize the class.
@@ -45,17 +47,17 @@ class WP_Capture_Shortcodes {
 
 		$form = get_post( $form_id );
 
-		if ( ! $form || $form->post_type !== 'capture_form' ) {
+		if ( ! $form || 'capture_form' !== $form->post_type ) {
 			return '';
 		}
 
-		// Start output buffering
+		// Start output buffering.
 		ob_start();
 
-		// Include the form template
-		include WP_CAPTURE_PLUGIN_DIR . 'templates/form.php';
+		// Include the form template.
+		include CAPTURE_PLUGIN_DIR . 'templates/form.php';
 
-		// Return the buffered content
+		// Return the buffered content.
 		return ob_get_clean();
 	}
 }

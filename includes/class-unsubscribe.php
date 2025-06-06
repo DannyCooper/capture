@@ -2,34 +2,43 @@
 /**
  * Handles unsubscribe functionality for WP Capture subscribers.
  *
- * @package    WP_Capture
- * @subpackage WP_Capture/includes
+ * @package    Capture
+ * @subpackage Capture/includes
  */
+
+namespace Capture;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-class WP_Capture_Unsubscribe {
+/**
+ * Handles unsubscribe functionality for WP Capture subscribers.
+ *
+ * @package    Capture
+ * @subpackage Capture/includes
+ * @since      1.0.0
+ */
+class Unsubscribe {
 
 	/**
 	 * Initialize the unsubscribe functionality.
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'handle_unsubscribe_request' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_unsubscribe_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'output_unsubscribe_styles' ) );
 	}
 
 	/**
 	 * Handle unsubscribe requests via URL parameters.
 	 */
 	public function handle_unsubscribe_request() {
-		// Check if this is an unsubscribe request
-		if ( ! isset( $_GET['wp_capture_unsubscribe'] ) || ! isset( $_GET['token'] ) ) {
+		// Check if this is an unsubscribe request.
+		if ( ! isset( $_GET['capture_unsubscribe'] ) || ! isset( $_GET['token'] ) ) {
 			return;
 		}
 
-		$token = sanitize_text_field( wp_unslash( $_GET['token'] ) );
+		$token  = sanitize_text_field( wp_unslash( $_GET['token'] ) );
 		$result = $this->process_unsubscribe( $token );
 
 		if ( $result['success'] ) {
@@ -46,88 +55,88 @@ class WP_Capture_Unsubscribe {
 	 * @return array Result with success status and message.
 	 */
 	private function process_unsubscribe( $token ) {
-		// Decode the token to get subscriber ID and email
+		// Decode the token to get subscriber ID and email.
 		$decoded = $this->decode_unsubscribe_token( $token );
-		
+
 		if ( ! $decoded ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Invalid unsubscribe link. Please contact the site administrator.', 'capture' )
+				'message' => __( 'Invalid unsubscribe link. Please contact the site administrator.', 'capture' ),
 			);
 		}
 
-		// Load the subscriber
-		$subscriber = new WP_Capture_Subscriber();
+		// Load the subscriber.
+		$subscriber      = new Subscriber();
 		$subscriber_data = null;
-		
-		// If subscriber_id is available, try to get by ID first
+
+		// If subscriber_id is available, try to get by ID first.
 		if ( ! empty( $decoded['subscriber_id'] ) ) {
 			$subscriber_data = $subscriber->get_by_id( $decoded['subscriber_id'] );
 		}
-		
-		// If not found by ID or ID was null, try to find by email
+
+		// If not found by ID or ID was null, try to find by email.
 		if ( ! $subscriber_data ) {
 			global $wpdb;
-			$table_name = WP_Capture_Database::get_subscribers_table_name();
-			$result = $wpdb->get_row( 
-				$wpdb->prepare( 
-					'SELECT * FROM ' . esc_sql( $table_name ) . ' WHERE email = %s LIMIT 1', 
-					$decoded['email'] 
-				), 
-				ARRAY_A 
+			$table_name = Database::get_subscribers_table_name();
+			$result     = $wpdb->get_row(
+				$wpdb->prepare(
+					'SELECT * FROM ' . esc_sql( $table_name ) . ' WHERE email = %s LIMIT 1',
+					$decoded['email']
+				),
+				ARRAY_A
 			);
-			
+
 			if ( $result ) {
-				$subscriber_data = new WP_Capture_Subscriber( $result );
+				$subscriber_data = new Subscriber( $result );
 			}
 		}
 
 		if ( ! $subscriber_data ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Subscriber not found. You may already be unsubscribed.', 'capture' )
+				'message' => __( 'Subscriber not found. You may already be unsubscribed.', 'capture' ),
 			);
 		}
 
-		// Verify the email matches
+		// Verify the email matches.
 		if ( $subscriber_data->email !== $decoded['email'] ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Invalid unsubscribe link. Please contact the site administrator.', 'capture' )
+				'message' => __( 'Invalid unsubscribe link. Please contact the site administrator.', 'capture' ),
 			);
 		}
 
-		// Check if already unsubscribed
-		if ( $subscriber_data->status === 'unsubscribed' ) {
+		// Check if already unsubscribed.
+		if ( 'unsubscribed' === $subscriber_data->status ) {
 			return array(
 				'success' => true,
-				'message' => __( 'You are already unsubscribed from our mailing list.', 'capture' )
+				'message' => __( 'You are already unsubscribed from our mailing list.', 'capture' ),
 			);
 		}
 
-		// Update subscriber status to unsubscribed
+		// Update subscriber status to unsubscribed.
 		$update_data = array(
-			'email' => $subscriber_data->email,
-			'name' => $subscriber_data->name,
-			'form_id' => $subscriber_data->form_id,
+			'email'      => $subscriber_data->email,
+			'name'       => $subscriber_data->name,
+			'form_id'    => $subscriber_data->form_id,
 			'user_agent' => $subscriber_data->user_agent,
-			'status' => 'unsubscribed',
+			'status'     => 'unsubscribed',
 			'source_url' => $subscriber_data->source_url,
 		);
 
-		$updated_subscriber = new WP_Capture_Subscriber( $update_data );
+		$updated_subscriber     = new Subscriber( $update_data );
 		$updated_subscriber->id = $subscriber_data->id;
-		$result = $updated_subscriber->save();
+		$result                 = $updated_subscriber->save();
 
 		if ( ! is_wp_error( $result ) ) {
 			return array(
 				'success' => true,
-				'message' => __( 'You have been successfully unsubscribed from our mailing list.', 'capture' )
+				'message' => __( 'You have been successfully unsubscribed from our mailing list.', 'capture' ),
 			);
 		} else {
 			return array(
 				'success' => false,
-				'message' => __( 'There was an error processing your request. Please try again or contact the site administrator.', 'capture' )
+				'message' => __( 'There was an error processing your request. Please try again or contact the site administrator.', 'capture' ),
 			);
 		}
 	}
@@ -140,27 +149,27 @@ class WP_Capture_Unsubscribe {
 	 * @return string The encoded unsubscribe token.
 	 */
 	public static function generate_unsubscribe_token( $subscriber_id, $email ) {
-		// Validate input parameters
+		// Validate input parameters.
 		if ( empty( $subscriber_id ) || ! is_numeric( $subscriber_id ) || intval( $subscriber_id ) <= 0 ) {
-			error_log( 'WP Capture: Invalid subscriber_id provided to generate_unsubscribe_token: ' . var_export( $subscriber_id, true ) );
+			error_log( 'WP Capture: Invalid subscriber_id provided to generate_unsubscribe_token: ' . $subscriber_id );
 			return false;
 		}
-		
+
 		if ( empty( $email ) || ! is_email( $email ) ) {
-			error_log( 'WP Capture: Invalid email provided to generate_unsubscribe_token: ' . var_export( $email, true ) );
+			error_log( 'WP Capture: Invalid email provided to generate_unsubscribe_token: ' . $email );
 			return false;
 		}
 
 		$data = array(
 			'subscriber_id' => intval( $subscriber_id ),
-			'email' => $email,
-			'timestamp' => time(),
+			'email'         => $email,
+			'timestamp'     => time(),
 		);
 
-		// Use WordPress built-in auth mechanism for security
-		$token = base64_encode( json_encode( $data ) );
-		$hash = wp_hash( $token . $subscriber_id . $email );
-		
+		// Use WordPress built-in auth mechanism for security.
+		$token = base64_encode( wp_json_encode( $data ) );
+		$hash  = wp_hash( $token . $subscriber_id . $email );
+
 		return base64_encode( $token . '|' . $hash );
 	}
 
@@ -182,28 +191,28 @@ class WP_Capture_Unsubscribe {
 		}
 
 		list( $data_token, $provided_hash ) = $parts;
-		$data = json_decode( base64_decode( $data_token ), true );
+		$data                               = json_decode( base64_decode( $data_token ), true );
 
 		if ( ! $data || ! isset( $data['email'], $data['timestamp'] ) ) {
 			return false;
 		}
-		
-		// Handle backwards compatibility for misspelled key
+
+		// Handle backwards compatibility for misspelled key.
 		if ( isset( $data['subscribar_id'] ) && ! isset( $data['subscriber_id'] ) ) {
 			$data['subscriber_id'] = $data['subscribar_id'];
 		}
-		
+
 		if ( ! isset( $data['subscriber_id'] ) || empty( $data['subscriber_id'] ) ) {
 			return false;
 		}
 
-		// Verify the hash
+		// Verify the hash.
 		$expected_hash = wp_hash( $data_token . $data['subscriber_id'] . $data['email'] );
 		if ( ! hash_equals( $expected_hash, $provided_hash ) ) {
 			return false;
 		}
 
-		// Check if token is not older than 30 days (optional security measure)
+		// Check if token is not older than 30 days (optional security measure).
 		if ( time() - $data['timestamp'] > ( 30 * 24 * 60 * 60 ) ) {
 			return false;
 		}
@@ -220,16 +229,16 @@ class WP_Capture_Unsubscribe {
 	 */
 	public static function generate_unsubscribe_url( $subscriber_id, $email ) {
 		$token = self::generate_unsubscribe_token( $subscriber_id, $email );
-		
-		// If token generation failed, return empty string
+
+		// If token generation failed, return empty string.
 		if ( false === $token ) {
 			error_log( 'WP Capture: Failed to generate unsubscribe token for subscriber_id: ' . $subscriber_id . ', email: ' . $email );
 			return '';
 		}
 
 		$args = array(
-			'wp_capture_unsubscribe' => '1',
-			'token' => $token,
+			'capture_unsubscribe' => '1',
+			'token'               => $token,
 		);
 
 		return add_query_arg( $args, home_url( '/' ) );
@@ -243,15 +252,15 @@ class WP_Capture_Unsubscribe {
 	 */
 	private function render_unsubscribe_page( $type, $message ) {
 		$page_title = __( 'Unsubscribe', 'capture' );
-		
-		// Prevent any other output
+
+		// Prevent any other output.
 		if ( ! headers_sent() ) {
 			header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
 		}
 
-		// Get site info
+		// Get site info.
 		$site_name = get_bloginfo( 'name' );
-		$site_url = home_url( '/' );
+		$site_url  = home_url( '/' );
 
 		?>
 		<!DOCTYPE html>
@@ -262,26 +271,26 @@ class WP_Capture_Unsubscribe {
 			<title><?php echo esc_html( $page_title . ' - ' . $site_name ); ?></title>
 			<?php wp_head(); ?>
 		</head>
-		<body class="wp-capture-unsubscribe-page">
-			<div class="wp-capture-unsubscribe-container">
-				<div class="wp-capture-unsubscribe-header">
+		<body class="capture-unsubscribe-page">
+			<div class="capture-unsubscribe-container">
+				<div class="capture-unsubscribe-header">
 					<h1><?php echo esc_html( $site_name ); ?></h1>
 					<h2><?php echo esc_html( $page_title ); ?></h2>
 				</div>
 				
-				<div class="wp-capture-unsubscribe-content">
-					<div class="wp-capture-message wp-capture-message-<?php echo esc_attr( $type ); ?>">
-						<?php if ( $type === 'success' ): ?>
-							<span class="wp-capture-icon">✓</span>
-						<?php else: ?>
-							<span class="wp-capture-icon">⚠</span>
+				<div class="capture-unsubscribe-content">
+					<div class="capture-message capture-message-<?php echo esc_attr( $type ); ?>">
+						<?php if ( $type === 'success' ) : ?>
+							<span class="capture-icon">✓</span>
+						<?php else : ?>
+							<span class="capture-icon">⚠</span>
 						<?php endif; ?>
 						<p><?php echo esc_html( $message ); ?></p>
 					</div>
 					
-					<div class="wp-capture-actions">
-						<a href="<?php echo esc_url( $site_url ); ?>" class="wp-capture-button">
-							<?php _e( 'Return to Website', 'capture' ); ?>
+					<div class="capture-actions">
+						<a href="<?php echo esc_url( $site_url ); ?>" class="capture-button">
+							<?php esc_html_e( 'Return to Website', 'capture' ); ?>
 						</a>
 					</div>
 				</div>
@@ -294,21 +303,17 @@ class WP_Capture_Unsubscribe {
 	}
 
 	/**
-	 * Enqueue styles for the unsubscribe page.
-	 */
-	public function enqueue_unsubscribe_styles() {
-		if ( isset( $_GET['wp_capture_unsubscribe'] ) ) {
-			$this->output_unsubscribe_styles();
-		}
-	}
-
-	/**
 	 * Output inline styles for the unsubscribe page.
 	 */
-	private function output_unsubscribe_styles() {
+	public function output_unsubscribe_styles() {
+
+		if ( ! isset( $_GET['capture_unsubscribe'] ) ) {
+			return;
+		}
+
 		?>
 		<style type="text/css">
-		.wp-capture-unsubscribe-page {
+		.capture-unsubscribe-page {
 			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 			line-height: 1.6;
 			color: #333;
@@ -317,7 +322,7 @@ class WP_Capture_Unsubscribe {
 			padding: 0;
 		}
 
-		.wp-capture-unsubscribe-container {
+		.capture-unsubscribe-container {
 			max-width: 600px;
 			margin: 50px auto;
 			background: #fff;
@@ -326,31 +331,31 @@ class WP_Capture_Unsubscribe {
 			overflow: hidden;
 		}
 
-		.wp-capture-unsubscribe-header {
+		.capture-unsubscribe-header {
 			background: #0073aa;
 			color: #fff;
 			padding: 30px;
 			text-align: center;
 		}
 
-		.wp-capture-unsubscribe-header h1 {
+		.capture-unsubscribe-header h1 {
 			margin: 0 0 10px 0;
 			font-size: 24px;
 			font-weight: 600;
 		}
 
-		.wp-capture-unsubscribe-header h2 {
+		.capture-unsubscribe-header h2 {
 			margin: 0;
 			font-size: 18px;
 			font-weight: 400;
 			opacity: 0.9;
 		}
 
-		.wp-capture-unsubscribe-content {
+		.capture-unsubscribe-content {
 			padding: 40px 30px;
 		}
 
-		.wp-capture-message {
+		.capture-message {
 			display: flex;
 			align-items: flex-start;
 			padding: 20px;
@@ -358,34 +363,34 @@ class WP_Capture_Unsubscribe {
 			margin-bottom: 30px;
 		}
 
-		.wp-capture-message-success {
+		.capture-message-success {
 			background: #d4edda;
 			border: 1px solid #c3e6cb;
 			color: #155724;
 		}
 
-		.wp-capture-message-error {
+		.capture-message-error {
 			background: #f8d7da;
 			border: 1px solid #f5c6cb;
 			color: #721c24;
 		}
 
-		.wp-capture-icon {
+		.capture-icon {
 			font-size: 20px;
 			margin-right: 12px;
 			margin-top: 2px;
 		}
 
-		.wp-capture-message p {
+		.capture-message p {
 			margin: 0;
 			font-size: 16px;
 		}
 
-		.wp-capture-actions {
+		.capture-actions {
 			text-align: center;
 		}
 
-		.wp-capture-button {
+		.capture-button {
 			display: inline-block;
 			background: #0073aa;
 			color: #fff;
@@ -396,23 +401,23 @@ class WP_Capture_Unsubscribe {
 			transition: background-color 0.2s ease;
 		}
 
-		.wp-capture-button:hover {
+		.capture-button:hover {
 			background: #005a87;
 			color: #fff;
 		}
 
 		@media (max-width: 640px) {
-			.wp-capture-unsubscribe-container {
+			.capture-unsubscribe-container {
 				margin: 20px;
 				max-width: none;
 			}
 			
-			.wp-capture-unsubscribe-header,
-			.wp-capture-unsubscribe-content {
+			.capture-unsubscribe-header,
+			.capture-unsubscribe-content {
 				padding: 20px;
 			}
 		}
 		</style>
 		<?php
 	}
-} 
+}

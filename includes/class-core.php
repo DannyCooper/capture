@@ -5,20 +5,27 @@
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @link       https://github.com/yourusername/wp-capture
+ * @link       https://github.com/yourusername/capture
  * @since      1.0.0
  *
- * @package    WP_Capture
- * @subpackage WP_Capture/includes
+ * @package    Capture
+ * @subpackage Capture/includes
  */
+
+namespace Capture;
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
 /**
  * The main plugin class.
  *
  * @since      1.0.0
- * @package    WP_Capture
+ * @package    Capture
  */
-class WP_Capture {
+class Core {
 	/**
 	 * The unique identifier of this plugin.
 	 *
@@ -50,23 +57,16 @@ class WP_Capture {
 	 * Initialize the plugin.
 	 */
 	public function __construct() {
-		$this->load_textdomain();
 		$this->load_dependencies();
 		$this->encryption_service = new Encryption(); // Instantiate your Encryption class.
 		$this->register_ems_services();
 		$this->define_admin_hooks();
-		$this->define_public_hooks();
-	}
 
-	/**
-	 * Load plugin textdomain for translations.
-	 */
-	private function load_textdomain() {
-		load_plugin_textdomain(
-			'capture',
-			false,
-			dirname( plugin_basename( WP_CAPTURE_PLUGIN_DIR . 'wp-capture.php' ) ) . '/languages'
-		);
+		// Initialize unsubscribe functionality.
+		new Unsubscribe();
+
+		// Initialize data retention functionality.
+		new Data_Retention();
 	}
 
 	/**
@@ -74,37 +74,36 @@ class WP_Capture {
 	 */
 	private function load_dependencies() {
 		// Load database and subscriber classes.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-wp-capture-database.php';
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-wp-capture-subscriber.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/class-database.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/class-subscriber.php';
 
-		// Load EMS service interfaces and implementations.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/ems/interface-ems-service.php';
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/ems/class-mailchimp-service.php';
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/ems/class-convertkit-service.php';
+		// // Load EMS service interfaces and implementations.
+		require_once CAPTURE_PLUGIN_DIR . 'includes/ems/interface-ems-service.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/ems/class-mailchimp-service.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/ems/class-convertkit-service.php';
 
-		// Load your custom Encryption class.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-encryption.php';
+		// // Load your custom Encryption class.
+		require_once CAPTURE_PLUGIN_DIR . 'includes/class-encryption.php';
 
 		// Load block registration.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/block-registration.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/block-registration.php';
 
 		// Load REST API handlers.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/rest-api-handlers.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/rest-api-handlers.php';
 		// Load frontend AJAX handlers.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/frontend-ajax-handlers.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/frontend-ajax-handlers.php';
 
 		// Load post type registration.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-wp-capture-post-types.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/class-post-types.php';
 
 		// Load unsubscribe functionality.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-wp-capture-unsubscribe.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/class-unsubscribe.php';
 
 		// Load data retention functionality.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/class-wp-capture-data-retention.php';
+		require_once CAPTURE_PLUGIN_DIR . 'includes/class-data-retention.php';
 
-		// Load admin and public classes.
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/admin/class-wp-capture-admin.php';
-		require_once WP_CAPTURE_PLUGIN_DIR . 'includes/public/class-wp-capture-public.php';
+		// Load admin classes.
+		require_once CAPTURE_PLUGIN_DIR . 'includes/admin/class-admin.php';
 	}
 
 	/**
@@ -112,12 +111,12 @@ class WP_Capture {
 	 */
 	private function register_ems_services() {
 		$this->ems_services = array(
-			'mailchimp' => new Mailchimp_Service(),
+			'mailchimp'  => new Mailchimp_Service(),
 			'convertkit' => new ConvertKit_Service(),
 		);
 
 		// Allow other plugins/themes to register their own EMS services.
-		$this->ems_services = apply_filters( 'wp_capture_register_ems_services', $this->ems_services );
+		$this->ems_services = apply_filters( 'capture_register_ems_services', $this->ems_services );
 	}
 
 	/**
@@ -141,7 +140,7 @@ class WP_Capture {
 			if ( method_exists( $service, 'get_provider_name' ) ) {
 				$services[ $key ] = array(
 					'name' => $service->get_provider_name(),
-					'key' => $key,
+					'key'  => $key,
 				);
 			}
 		}
@@ -161,31 +160,15 @@ class WP_Capture {
 	 * Register all of the hooks related to the admin area functionality.
 	 */
 	private function define_admin_hooks() {
-		$plugin_admin = new WP_Capture_Admin( $this );
+		$plugin_admin = new Admin( $this );
 
 		// Add menu item.
 		add_action( 'admin_menu', array( $plugin_admin, 'add_plugin_admin_menu' ) );
 
 		// Add Settings link to the plugin.
 		add_filter(
-			'plugin_action_links_' . plugin_basename( WP_CAPTURE_PLUGIN_DIR . 'wp-capture.php' ),
+			'plugin_action_links_' . plugin_basename( CAPTURE_PLUGIN_DIR . 'capture.php' ),
 			array( $plugin_admin, 'add_action_links' )
 		);
-	}
-
-	/**
-	 * Register all of the hooks related to the public-facing functionality.
-	 */
-	private function define_public_hooks() {
-		$plugin_public = new WP_Capture_Public( $this );
-
-		// Register scripts and styles.
-		add_action( 'wp_enqueue_scripts', array( $plugin_public, 'enqueue_styles' ) );
-
-		// Initialize unsubscribe functionality.
-		new WP_Capture_Unsubscribe();
-
-		// Initialize data retention functionality.
-		new WP_Capture_Data_Retention();
 	}
 }

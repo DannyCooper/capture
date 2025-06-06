@@ -2,10 +2,20 @@
 /**
  * ConvertKit EMS service implementation.
  *
- * @since      1.0.0
- * @package    WP_Capture
+ * @package Capture
+ * @since   1.0.0
  */
 
+namespace Capture;
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+/**
+ * ConvertKit EMS service implementation class.
+ */
 class ConvertKit_Service implements Ems_Service_Interface {
 	/**
 	 * The ConvertKit API endpoint.
@@ -80,13 +90,13 @@ class ConvertKit_Service implements Ems_Service_Interface {
 				'headers' => array(
 					'Content-Type' => 'application/json; charset=utf-8',
 				),
-				'body'    => json_encode(
+				'body'    => wp_json_encode(
 					array(
-						'api_key' => $credentials['api_key'],
-						'email'   => $email,
+						'api_key'    => $credentials['api_key'],
+						'email'      => $email,
 						'first_name' => $form_data['first_name'] ?? '',
-						'fields' => $form_data['fields'] ?? array(),
-						'tags' => $form_data['tags'] ?? array(),
+						'fields'     => $form_data['fields'] ?? array(),
+						'tags'       => $form_data['tags'] ?? array(),
 					)
 				),
 			)

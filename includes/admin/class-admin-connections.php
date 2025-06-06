@@ -2,28 +2,42 @@
 /**
  * Handles the connections page and related AJAX functionality for WP Capture.
  *
- * @package    WP_Capture
- * @subpackage WP_Capture/includes/admin
+ * @package    Capture
+ * @subpackage Capture/includes/admin
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+namespace Capture;
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
 }
 
-class WP_Capture_Admin_Connections {
+/**
+ * Admin_Connections class.
+ */
+class Admin_Connections {
 
+	/**
+	 * The plugin instance.
+	 *
+	 * @var Core
+	 */
 	private $plugin;
-	private $main_admin; // Reference to WP_Capture_Admin
 
-	public function __construct( WP_Capture $plugin, WP_Capture_Admin $main_admin ) {
-		$this->plugin     = $plugin;
-		$this->main_admin = $main_admin;
+	/**
+	 * Constructor.
+	 *
+	 * @param Core $plugin The plugin instance.
+	 */
+	public function __construct( Core $plugin ) {
+		$this->plugin = $plugin;
 
-		// Register AJAX hooks
-		add_action( 'wp_ajax_wp_capture_save_test_connection', array( $this, 'ajax_save_test_connection' ) );
-		add_action( 'wp_ajax_wp_capture_test_connection', array( $this, 'ajax_test_connection' ) );
-		add_action( 'wp_ajax_wp_capture_remove_connection', array( $this, 'ajax_remove_connection' ) );
-		add_action( 'wp_ajax_wp_capture_update_connection', array( $this, 'ajax_update_connection' ) );
+		// Register AJAX hooks.
+		add_action( 'wp_ajax_capture_save_test_connection', array( $this, 'ajax_save_test_connection' ) );
+		add_action( 'wp_ajax_capture_test_connection', array( $this, 'ajax_test_connection' ) );
+		add_action( 'wp_ajax_capture_remove_connection', array( $this, 'ajax_remove_connection' ) );
+		add_action( 'wp_ajax_capture_update_connection', array( $this, 'ajax_update_connection' ) );
 	}
 
 	/**
@@ -44,10 +58,10 @@ class WP_Capture_Admin_Connections {
 	 * This renders the main interface for managing connections.
 	 */
 	public function ems_connections_ui_callback() {
-		$options     = get_option( 'wp_capture_options', array() );
+		$options     = get_option( 'capture_options', array() );
 		$connections = isset( $options['ems_connections'] ) ? $options['ems_connections'] : array();
 
-		echo '<div id="wp-capture-connections-wrapper">';
+		echo '<div id="capture-connections-wrapper">';
 		if ( ! empty( $connections ) ) {
 			foreach ( $connections as $connection_id => $connection ) {
 				$connection_name_display = isset( $connection['name'] ) && ! empty( $connection['name'] )
@@ -55,22 +69,21 @@ class WP_Capture_Admin_Connections {
 					: ( isset( $connection['provider'] ) ? esc_html( $connection['provider'] ) : __( 'Unnamed Connection', 'capture' ) );
 				$provider_display        = isset( $connection['provider'] ) ? esc_html( $connection['provider'] ) : __( 'Unknown Provider', 'capture' );
 
-				echo '<div class="wp-capture-connection-item" data-id="' . esc_attr( $connection_id ) . '">';
+				echo '<div class="capture-connection-item" data-id="' . esc_attr( $connection_id ) . '">';
 				echo '<h4>' . esc_html( $connection_name_display ) . ' (' . esc_html( $provider_display ) . ')</h4>';
 
-				echo '<p><label for="wp-capture-name-' . esc_attr( $connection_id ) . '">' . __( 'Connection Name (Optional)', 'capture' ) . ':</label><br/>';
+				echo '<p><label for="capture-name-' . esc_attr( $connection_id ) . '">' . esc_html__( 'Connection Name (Optional)', 'capture' ) . ':</label><br/>';
 				$current_name_val = isset( $connection['name'] ) ? esc_attr( $connection['name'] ) : '';
-				echo '<input id="wp-capture-name-' . esc_attr( $connection_id ) . '" type="text" class="wp-capture-connection-name-input" name="wp_capture_options[ems_connections][' . esc_attr( $connection_id ) . '][name]" value="' . $current_name_val . '" /></p>';
+				echo '<input placeholder="' . esc_attr( $connection_id ) . '" id="capture-name-' . esc_attr( $connection_id ) . '" type="text" class="capture-connection-name-input" name="capture_options[ems_connections][' . esc_attr( $connection_id ) . '][name]" value="' . esc_attr( $current_name_val ) . '" /></p>';
 
 				if ( isset( $connection['provider'] ) ) {
-					echo '<input type="hidden" class="wp-capture-provider-value" name="wp_capture_options[ems_connections][' . esc_attr( $connection_id ) . '][provider]" value="' . esc_attr( $connection['provider'] ) . '" />';
+					echo '<input type="hidden" class="capture-provider-value" name="capture_options[ems_connections][' . esc_attr( $connection_id ) . '][provider]" value="' . esc_attr( $connection['provider'] ) . '" />';
 				}
-
-				echo '<p><label for="wp-capture-api-key-' . esc_attr( $connection_id ) . '">' . __( 'API Key', 'capture' ) . ':</label><br/>';
 
 				$stored_encrypted_key = isset( $connection['api_key'] ) ? $connection['api_key'] : '';
 				$placeholder_text     = __( 'Enter API key', 'capture' );
-				$key_display_html     = '';
+				echo '<p><label for="capture-api-key-' . esc_attr( $connection_id ) . '">' . esc_html__( 'API Key', 'capture' ) . ':</label>';
+				$key_display_html = '';
 
 				if ( ! empty( $stored_encrypted_key ) ) {
 					$encryption_service        = $this->plugin->get_encryption_service();
@@ -86,12 +99,12 @@ class WP_Capture_Admin_Connections {
 						// If OpenSSL is on but decryption failed and returned original (encrypted) string, this will mask the encrypted string.
 						// We rely on the decrypt method's behavior to either give plaintext or the original if issues.
 						$masked_key_preview = '••••••••••••' . substr( esc_html( $decrypted_key_for_display ), -4 );
-						$key_display_html   = '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__( 'Current key:', 'capture' ) . ' ' . $masked_key_preview . '</em></p>';
+						$key_display_html   = '<span style="margin-top: 0; margin-bottom: 5px; display: block;"><em>' . esc_html__( 'Current key:', 'capture' ) . ' ' . $masked_key_preview . '</em></span>';
 						$placeholder_text   = __( 'Enter new key to change, or leave empty to keep current', 'capture' );
 					} elseif ( $encryption_service ) {
 						// Stored key was not empty, but decrypted display key is empty.
 						// This implies an issue with decryption if OpenSSL was active, or empty key was stored post-encryption (unlikely).
-						$key_display_html = '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__( 'Current key: Set (preview unavailable)', 'capture' ) . '</em></p>';
+						$key_display_html = '<span style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__( 'Current key: Set (preview unavailable)', 'capture' ) . '</em></span>';
 						$placeholder_text = __( 'Enter new key to change, or leave empty to keep current', 'capture' );
 					} else {
 						// Encryption service itself is not available.
@@ -99,51 +112,53 @@ class WP_Capture_Admin_Connections {
 						$placeholder_text = __( 'Enter new key to change, or leave empty to keep current', 'capture' );
 					}
 				} else {
-					// If no key is set
+					// If no key is set.
 					$key_display_html = '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__( 'No API key set.', 'capture' ) . '</em></p>';
 				}
 
-				echo $key_display_html; // Output the determined key display HTML
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Contains safe HTML from above.
+				echo $key_display_html;
 
-				echo '<input id="wp-capture-api-key-' . esc_attr( $connection_id ) . '" type="text" class="wp-capture-api-key-input" name="wp_capture_options[ems_connections][' . esc_attr( $connection_id ) . '][api_key]" value="" placeholder="' . esc_attr( $placeholder_text ) . '" autocomplete="off" style="width: 100%;" />';
+				echo '<input id="capture-api-key-' . esc_attr( $connection_id ) . '" type="text" class="capture-api-key-input" name="capture_options[ems_connections][' . esc_attr( $connection_id ) . '][api_key]" value="" placeholder="' . esc_attr( $placeholder_text ) . '" autocomplete="off" style="width: 100%;" />';
+				echo '</p>';
 
-				echo '<div class="wp-capture-connection-actions">';
-				echo '<button type="button" class="button button-primary wp-capture-update-connection" data-id="' . esc_attr( $connection_id ) . '">' . __( 'Update', 'capture' ) . '</button> ';
-				echo '<button type="button" class="button wp-capture-test-connection" data-id="' . esc_attr( $connection_id ) . '" data-provider="' . esc_attr( isset( $connection['provider'] ) ? $connection['provider'] : '' ) . '">' . __( 'Test Connection', 'capture' ) . '</button> ';
-				echo '<button type="button" class="button wp-capture-remove-connection" data-id="' . esc_attr( $connection_id ) . '">' . __( 'Remove', 'capture' ) . '</button>';
+				echo '<div class="capture-connection-actions">';
+				echo '<button type="button" class="button button-primary capture-update-connection" data-id="' . esc_attr( $connection_id ) . '">' . esc_html__( 'Update', 'capture' ) . '</button> ';
+				echo '<button type="button" class="button capture-test-connection" data-id="' . esc_attr( $connection_id ) . '" data-provider="' . esc_attr( isset( $connection['provider'] ) ? $connection['provider'] : '' ) . '">' . esc_html__( 'Test Connection', 'capture' ) . '</button> ';
+				echo '<button type="button" class="button capture-remove-connection" data-id="' . esc_attr( $connection_id ) . '">' . esc_html__( 'Remove', 'capture' ) . '</button>';
 				echo '</div>';
 
-				echo '<div class="wp-capture-connection-status"></div>';
+				echo '<div class="capture-connection-status"></div>';
 				echo '</div>';
 			}
 		}
 		echo '</div>';
 
-		echo '<button type="button" class="button button-secondary" id="wp-capture-add-new-connection">' . __( 'Add New Connection', 'capture' ) . '</button>';
+		echo '<button type="button" class="button button-secondary" id="capture-add-new-connection">' . esc_html__( 'Add New Connection', 'capture' ) . '</button>';
 
-		echo '<script type="text/html" id="wp-capture-connection-template">';
-		echo '<div class="wp-capture-connection-item is-new" data-id="NEW_KEY_PLACEHOLDER">';
-		echo '<h4>' . __( 'New Connection', 'capture' ) . '</h4>';
+		echo '<script type="text/html" id="capture-connection-template">';
+		echo '<div class="capture-connection-item is-new" data-id="NEW_KEY_PLACEHOLDER">';
+		echo '<h4>' . esc_html__( 'New Connection', 'capture' ) . '</h4>';
 
-		echo '<p><label for="wp-capture-provider-NEW_KEY_PLACEHOLDER">' . __( 'Provider', 'capture' ) . ':</label><br/>';
-		echo '<select id="wp-capture-provider-NEW_KEY_PLACEHOLDER" name="wp_capture_options[ems_connections][NEW_KEY_PLACEHOLDER][provider]" class="wp-capture-provider-select">';
-		echo '<option value="">' . __( '-- Select Provider --', 'capture' ) . '</option>';
+		echo '<p><label for="capture-provider-NEW_KEY_PLACEHOLDER">' . esc_html__( 'Provider', 'capture' ) . ':</label><br/>';
+		echo '<select id="capture-provider-NEW_KEY_PLACEHOLDER" name="capture_options[ems_connections][NEW_KEY_PLACEHOLDER][provider]" class="capture-provider-select">';
+		echo '<option value="">' . esc_html__( '-- Select Provider --', 'capture' ) . '</option>';
 
 		$available_providers = $this->plugin->get_registered_services();
-		foreach ( $available_providers as $provider_key => $provider_label ) {
-			echo '<option value="' . esc_attr( $provider_key ) . '">' . esc_html( $provider_label ) . '</option>';
+		foreach ( $available_providers as $providor ) {
+			echo '<option value="' . esc_attr( $providor['key'] ) . '">' . esc_html( $providor['name'] ) . '</option>';
 		}
 		echo '</select></p>';
-		echo '<p><label for="wp-capture-name-NEW_KEY_PLACEHOLDER">' . __( 'Connection Name (Optional)', 'capture' ) . ':</label><br/>';
-		echo '<input id="wp-capture-name-NEW_KEY_PLACEHOLDER" type="text" name="wp_capture_options[ems_connections][NEW_KEY_PLACEHOLDER][name]" placeholder="' . __( 'e.g., Newsletter Opt-ins', 'capture' ) . '" /></p>';
-		echo '<p><label for="wp-capture-api-key-NEW_KEY_PLACEHOLDER">' . __( 'API Key', 'capture' ) . ':</label><br/>';
-		echo '<input id="wp-capture-api-key-NEW_KEY_PLACEHOLDER" type="text" class="wp-capture-api-key-input" name="wp_capture_options[ems_connections][NEW_KEY_PLACEHOLDER][api_key]" /></p>';
-		echo '<div class="wp-capture-connection-actions">';
-		echo '<button type="button" class="button wp-capture-save-test-connection" data-id="NEW_KEY_PLACEHOLDER">' . __( 'Save & Test', 'capture' ) . '</button> ';
-		echo '<button type="button" class="button wp-capture-remove-connection" data-id="NEW_KEY_PLACEHOLDER">' . __( 'Remove', 'capture' ) . '</button>';
+		echo '<p><label for="capture-name-NEW_KEY_PLACEHOLDER">' . esc_html__( 'Connection Name (Optional)', 'capture' ) . ':</label><br/>';
+		echo '<input id="capture-name-NEW_KEY_PLACEHOLDER" type="text" name="capture_options[ems_connections][NEW_KEY_PLACEHOLDER][name]" placeholder="' . esc_attr__( 'e.g., Newsletter Opt-ins', 'capture' ) . '" /></p>';
+		echo '<p><label for="capture-api-key-NEW_KEY_PLACEHOLDER">' . esc_html__( 'API Key', 'capture' ) . ':</label><br/>';
+		echo '<input id="capture-api-key-NEW_KEY_PLACEHOLDER" type="text" class="capture-api-key-input" name="capture_options[ems_connections][NEW_KEY_PLACEHOLDER][api_key]" /></p>';
+		echo '<div class="capture-connection-actions">';
+		echo '<button type="button" class="button capture-save-test-connection" data-id="NEW_KEY_PLACEHOLDER">' . esc_html__( 'Save & Test', 'capture' ) . '</button> ';
+		echo '<button type="button" class="button capture-remove-connection" data-id="NEW_KEY_PLACEHOLDER">' . esc_html__( 'Remove', 'capture' ) . '</button>';
 		echo '</div>';
 
-		echo '<div class="wp-capture-connection-status"></div>';
+		echo '<div class="capture-connection-status"></div>';
 		echo '</div>';
 		echo '</script>';
 	}
@@ -152,17 +167,18 @@ class WP_Capture_Admin_Connections {
 	 * AJAX handler to save and test a single EMS connection.
 	 */
 	public function ajax_save_test_connection() {
-		check_ajax_referer( 'wp_capture_admin_nonce', 'nonce' );
+		\check_ajax_referer( 'capture_admin_nonce', 'nonce' );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'You do not have permission to perform this action.', 'capture' ) ) );
+		if ( ! \current_user_can( 'manage_options' ) ) {
+			\wp_send_json_error( array( 'message' => \__( 'You do not have permission to perform this action.', 'capture' ) ) );
 			return;
 		}
 
 		$connection_id = isset( $_POST['connection_id'] ) ? sanitize_text_field( wp_unslash( $_POST['connection_id'] ) ) : '';
 		$provider      = isset( $_POST['provider'] ) ? sanitize_text_field( wp_unslash( $_POST['provider'] ) ) : '';
-		$raw_api_key   = isset( $_POST['api_key'] ) ? trim( wp_unslash( $_POST['api_key'] ) ) : '';
-		$name          = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- API keys should not be sanitized as they may contain special characters.
+		$raw_api_key = isset( $_POST['api_key'] ) ? trim( wp_unslash( $_POST['api_key'] ) ) : '';
+		$name        = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 
 		if ( empty( $provider ) || empty( $raw_api_key ) ) {
 			wp_send_json_error( array( 'message' => __( 'Provider and API key are required.', 'capture' ) ) );
@@ -171,11 +187,12 @@ class WP_Capture_Admin_Connections {
 
 		$service = $this->plugin->get_service( $provider );
 		if ( ! $service ) {
+			/* translators: %s: Provider name */
 			wp_send_json_error( array( 'message' => sprintf( __( 'Provider "%s" is not supported.', 'capture' ), esc_html( $provider ) ) ) );
 			return;
 		}
 
-		// Use the raw API key for validation
+		// Use the raw API key for validation.
 		$credentials_for_validation = array( 'api_key' => $raw_api_key );
 		$valid                      = $service->validate_credentials( $credentials_for_validation );
 
@@ -184,15 +201,15 @@ class WP_Capture_Admin_Connections {
 			return;
 		}
 
-		// Encrypt the API key before saving
+		// Encrypt the API key before saving.
 		$encryption_service = $this->plugin->get_encryption_service();
 		if ( ! $encryption_service ) {
-			// This case should ideally be handled by an admin notice, but good to have a fallback
+			// This case should ideally be handled by an admin notice, but good to have a fallback.
 			wp_send_json_error( array( 'message' => __( 'Encryption service is not available. Cannot save connection.', 'capture' ) ) );
 			return;
 		}
 		$api_key_to_save = $encryption_service->encrypt( $raw_api_key );
-		if ( $api_key_to_save === $raw_api_key && extension_loaded( 'openssl' ) && Encryption::is_properly_configured() ) {
+		if ( $api_key_to_save === $raw_api_key && extension_loaded( 'openssl' ) && \Capture\Encryption::is_properly_configured() ) {
 			// If encryption returned the same value and OpenSSL is loaded and keys are configured,
 			// it implies an encryption failure for some other reason, or the key was empty.
 			// We already check for empty raw_api_key, so this is an unexpected state.
@@ -201,7 +218,7 @@ class WP_Capture_Admin_Connections {
 			return;
 		}
 
-		$options = get_option( 'wp_capture_options', array() );
+		$options = get_option( 'capture_options', array() );
 		if ( ! isset( $options['ems_connections'] ) ) {
 			$options['ems_connections'] = array();
 		}
@@ -216,21 +233,29 @@ class WP_Capture_Admin_Connections {
 			'name'     => $name,
 		);
 
-		update_option( 'wp_capture_options', $options );
+		$update_result = update_option( 'capture_options', $options );
 
-		wp_send_json_success(
-			array(
-				'message'       => __( 'Connection saved and tested successfully!', 'capture' ),
-				'connection_id' => $connection_id,
-			)
-		);
+		if ( $update_result ) {
+			wp_send_json_success(
+				array(
+					'message'       => __( 'Connection saved and tested successfully!', 'capture' ),
+					'connection_id' => $connection_id,
+				)
+			);
+		} else {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Connection was validated but failed to save to database.', 'capture' ),
+				)
+			);
+		}
 	}
 
 	/**
 	 * AJAX handler to test an existing EMS connection.
 	 */
 	public function ajax_test_connection() {
-		check_ajax_referer( 'wp_capture_admin_nonce', 'nonce' );
+		check_ajax_referer( 'capture_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'You do not have permission to perform this action.', 'capture' ) ) );
@@ -243,7 +268,7 @@ class WP_Capture_Admin_Connections {
 			return;
 		}
 
-		$options     = get_option( 'wp_capture_options', array() );
+		$options     = get_option( 'capture_options', array() );
 		$connections = isset( $options['ems_connections'] ) ? $options['ems_connections'] : array();
 
 		if ( ! isset( $connections[ $connection_id ] ) ) {
@@ -262,11 +287,12 @@ class WP_Capture_Admin_Connections {
 
 		$service = $this->plugin->get_service( $provider );
 		if ( ! $service ) {
+			/* translators: %s: Provider name */
 			wp_send_json_error( array( 'message' => sprintf( __( 'Provider "%s" is not supported.', 'capture' ), esc_html( $provider ) ) ) );
 			return;
 		}
 
-		// Decrypt the stored API key for validation
+		// Decrypt the stored API key for validation.
 		$encryption_service = $this->plugin->get_encryption_service();
 		if ( ! $encryption_service ) {
 			wp_send_json_error( array( 'message' => __( 'Encryption service is not available. Cannot test connection.', 'capture' ) ) );
@@ -301,7 +327,7 @@ class WP_Capture_Admin_Connections {
 	 * AJAX handler to remove an EMS connection.
 	 */
 	public function ajax_remove_connection() {
-		check_ajax_referer( 'wp_capture_admin_nonce', 'nonce' );
+		check_ajax_referer( 'capture_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'You do not have permission to perform this action.', 'capture' ) ) );
@@ -315,25 +341,28 @@ class WP_Capture_Admin_Connections {
 			return;
 		}
 
-		$options = get_option( 'wp_capture_options', array() );
+		$options = get_option( 'capture_options', array() );
 
 		if ( isset( $options['ems_connections'][ $connection_id ] ) ) {
 			unset( $options['ems_connections'][ $connection_id ] );
 
-			update_option( 'wp_capture_options', $options );
-			wp_send_json_success( array( 'message' => __( 'Connection removed successfully.', 'capture' ) ) );
+			$update_result = update_option( 'capture_options', $options );
+
+			if ( $update_result ) {
+				wp_send_json_success(
+					array(
+						'message' => __( 'Connection removed successfully.', 'capture' ),
+					)
+				);
+			} else {
+				wp_send_json_error(
+					array(
+						'message' => __( 'Connection was removed from memory but failed to save to database.', 'capture' ),
+					)
+				);
+			}
 		} else {
-			$available_keys = ! empty( $options['ems_connections'] ) ? array_keys( $options['ems_connections'] ) : array();
-			$debug_message  = sprintf(
-				__( 'Connection with ID "%1$s" not found. Available connection IDs: %2$s.', 'capture' ),
-				$connection_id,
-				implode( ', ', $available_keys )
-			);
-			wp_send_json_error(
-				array(
-					'message' => $debug_message,
-				)
-			);
+			wp_send_json_error( array( 'message' => __( 'Connection not found.', 'capture' ) ) );
 		}
 	}
 
@@ -341,13 +370,14 @@ class WP_Capture_Admin_Connections {
 	 * AJAX handler to update an existing EMS connection.
 	 */
 	public function ajax_update_connection() {
-		check_ajax_referer( 'wp_capture_admin_nonce', 'nonce' );
+		check_ajax_referer( 'capture_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'You do not have permission to perform this action.', 'capture' ) ) );
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- API keys should not be sanitized as they may contain special characters.
 		$submitted_raw_api_key = isset( $_POST['api_key'] ) ? trim( wp_unslash( $_POST['api_key'] ) ) : '';
 		$connection_id         = isset( $_POST['connection_id'] ) ? sanitize_text_field( wp_unslash( $_POST['connection_id'] ) ) : '';
 		$submitted_name        = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
@@ -357,7 +387,7 @@ class WP_Capture_Admin_Connections {
 			return;
 		}
 
-		$options = get_option( 'wp_capture_options', array() );
+		$options = get_option( 'capture_options', array() );
 		if ( ! isset( $options['ems_connections'] ) || ! isset( $options['ems_connections'][ $connection_id ] ) ) {
 			wp_send_json_error( array( 'message' => __( 'Connection not found.', 'capture' ) ) );
 			return;
@@ -365,16 +395,17 @@ class WP_Capture_Admin_Connections {
 
 		$current_connection = $options['ems_connections'][ $connection_id ];
 		$provider           = $current_connection['provider'];
-		$api_key_to_save    = $current_connection['api_key']; // Keep current encrypted key by default
+		$api_key_to_save    = $current_connection['api_key']; // Keep current encrypted key by default.
 
 		if ( ! empty( $submitted_raw_api_key ) ) {
 			$service = $this->plugin->get_service( $provider );
 			if ( ! $service ) {
+				/* translators: %s: Provider name */
 				wp_send_json_error( array( 'message' => sprintf( __( 'Provider "%s" is not supported.', 'capture' ), esc_html( $provider ) ) ) );
 				return;
 			}
 
-			// Use the raw submitted API key for validation
+			// Use the raw submitted API key for validation.
 			$credentials_for_validation = array( 'api_key' => $submitted_raw_api_key );
 			$valid                      = $service->validate_credentials( $credentials_for_validation );
 
@@ -383,14 +414,14 @@ class WP_Capture_Admin_Connections {
 				return;
 			}
 
-			// Encrypt the new API key before saving
+			// Encrypt the new API key before saving.
 			$encryption_service = $this->plugin->get_encryption_service();
 			if ( ! $encryption_service ) {
 				wp_send_json_error( array( 'message' => __( 'Encryption service is not available. Cannot update connection.', 'capture' ) ) );
 				return;
 			}
 			$api_key_to_save = $encryption_service->encrypt( $submitted_raw_api_key );
-			if ( $api_key_to_save === $submitted_raw_api_key && ! empty( $submitted_raw_api_key ) && extension_loaded( 'openssl' ) && Encryption::is_properly_configured() ) {
+			if ( $api_key_to_save === $submitted_raw_api_key && ! empty( $submitted_raw_api_key ) && extension_loaded( 'openssl' ) && \Capture\Encryption::is_properly_configured() ) {
 				error_log( 'WP Capture: API Key encryption failed unexpectedly during update.' );
 				wp_send_json_error( array( 'message' => __( 'Could not securely save the new API key. Encryption failed.', 'capture' ) ) );
 				return;
@@ -400,14 +431,27 @@ class WP_Capture_Admin_Connections {
 		$options['ems_connections'][ $connection_id ]['name']    = $submitted_name;
 		$options['ems_connections'][ $connection_id ]['api_key'] = $api_key_to_save;
 
-		update_option( 'wp_capture_options', $options );
+		if ( $current_connection['name'] === $submitted_name && $current_connection['api_key'] === $api_key_to_save ) {
+			wp_send_json_error( array( 'message' => __( 'No changes were made to the connection.', 'capture' ) ) );
+			return;
+		}
 
-		wp_send_json_success(
-			array(
-				'message'       => __( 'Connection updated successfully!', 'capture' ),
-				'connection_id' => $connection_id,
-				'new_name'      => $submitted_name,
-			)
-		);
+		$update_result = update_option( 'capture_options', $options );
+
+		if ( $update_result ) {
+			wp_send_json_success(
+				array(
+					'message'       => __( 'Connection updated successfully!', 'capture' ),
+					'connection_id' => $connection_id,
+					'new_name'      => $submitted_name,
+				)
+			);
+		} else {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Connection data was valid but failed to save to database.', 'capture' ),
+				)
+			);
+		}
 	}
 }

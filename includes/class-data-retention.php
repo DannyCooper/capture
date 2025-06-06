@@ -2,39 +2,42 @@
 /**
  * Handles data retention functionality for WP Capture.
  *
- * @package    WP_Capture
- * @subpackage WP_Capture/includes
+ * @package    Capture
+ * @subpackage Capture/includes
  */
+
+namespace Capture;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
+
 }
 
 /**
- * Class WP_Capture_Data_Retention
- * 
+ * Class Data_Retention
+ *
  * Manages automatic deletion of subscriber data based on retention settings.
  */
-class WP_Capture_Data_Retention {
+class Data_Retention {
 
 	/**
 	 * Initialize the data retention functionality.
 	 */
 	public function __construct() {
-		add_action( 'wp_capture_data_retention_cleanup', array( $this, 'cleanup_expired_data' ) );
+		add_action( 'capture_data_retention_cleanup', array( $this, 'cleanup_expired_data' ) );
 		add_action( 'init', array( $this, 'schedule_cleanup_event' ) );
-		
-		// Hook into settings save to reschedule if retention period changes
-		add_action( 'update_option_wp_capture_options', array( $this, 'handle_settings_update' ), 10, 2 );
+
+		// Hook into settings save to reschedule if retention period changes.
+		add_action( 'update_option_capture_options', array( $this, 'handle_settings_update' ), 10, 2 );
 	}
 
 	/**
 	 * Schedule the cleanup event if not already scheduled.
 	 */
 	public function schedule_cleanup_event() {
-		if ( ! wp_next_scheduled( 'wp_capture_data_retention_cleanup' ) ) {
-			// Schedule daily cleanup at 3 AM
-			wp_schedule_event( strtotime( 'tomorrow 3:00 AM' ), 'daily', 'wp_capture_data_retention_cleanup' );
+		if ( ! wp_next_scheduled( 'capture_data_retention_cleanup' ) ) {
+			// Schedule daily cleanup at 3 AM.
+			wp_schedule_event( strtotime( 'tomorrow 3:00 AM' ), 'daily', 'capture_data_retention_cleanup' );
 		}
 	}
 
@@ -48,9 +51,9 @@ class WP_Capture_Data_Retention {
 		$old_retention = isset( $old_value['data_retention_days'] ) ? $old_value['data_retention_days'] : 0;
 		$new_retention = isset( $new_value['data_retention_days'] ) ? $new_value['data_retention_days'] : 0;
 
-		// If retention setting changed, clear and reschedule
+		// If retention setting changed, clear and reschedule.
 		if ( $old_retention !== $new_retention ) {
-			wp_clear_scheduled_hook( 'wp_capture_data_retention_cleanup' );
+			wp_clear_scheduled_hook( 'capture_data_retention_cleanup' );
 			$this->schedule_cleanup_event();
 		}
 	}
@@ -59,10 +62,10 @@ class WP_Capture_Data_Retention {
 	 * Clean up expired subscriber data based on retention settings.
 	 */
 	public function cleanup_expired_data() {
-		$options = get_option( 'wp_capture_options', array() );
+		$options        = get_option( 'capture_options', array() );
 		$retention_days = isset( $options['data_retention_days'] ) ? intval( $options['data_retention_days'] ) : 0;
 
-		// If retention is 0, keep data indefinitely
+		// If retention is 0, keep data indefinitely.
 		if ( $retention_days <= 0 ) {
 			return;
 		}
@@ -70,27 +73,31 @@ class WP_Capture_Data_Retention {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'capture_subscribers';
 
-		// Calculate cutoff date
+		// Calculate cutoff date.
 		$cutoff_date = gmdate( 'Y-m-d H:i:s', strtotime( "-{$retention_days} days" ) );
 
-		// Delete subscribers older than retention period
-		$deleted_count = $wpdb->delete(
-			$table_name,
-			array(
-				'date_subscribed' => array(
-					'value' => $cutoff_date,
-					'compare' => '<'
-				)
-			),
-			array( '%s' )
+		// Delete subscribers older than retention period using prepared query.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is properly escaped, data is prepared
+		$deleted_count = $wpdb->query(
+			$wpdb->prepare(
+				'DELETE FROM `' . esc_sql( $table_name ) . '` WHERE date_subscribed < %s AND status = %s',
+				$cutoff_date,
+				'unsubscribed'
+			)
 		);
 
-		// Log cleanup activity
+		// Handle database error.
+		if ( false === $deleted_count ) {
+			error_log( 'WP Capture Data Retention: Database error during cleanup - ' . $wpdb->last_error );
+			return;
+		}
+
+		// Log cleanup activity.
 		if ( $deleted_count > 0 ) {
 			error_log( sprintf( 'WP Capture Data Retention: Deleted %d subscriber records older than %d days.', $deleted_count, $retention_days ) );
 		}
 
-		// Optional: Send admin notification about cleanup
+		// Optional: Send admin notification about cleanup.
 		$this->maybe_send_cleanup_notification( $deleted_count, $retention_days );
 	}
 
@@ -101,36 +108,33 @@ class WP_Capture_Data_Retention {
 	 * @param int $retention_days Retention period in days.
 	 */
 	private function maybe_send_cleanup_notification( $deleted_count, $retention_days ) {
-		// Only send notification if records were deleted and admin notifications are enabled
+		// Only send notification if records were deleted and admin notifications are enabled.
 		if ( $deleted_count <= 0 ) {
 			return;
 		}
 
-		$options = get_option( 'wp_capture_options', array() );
-		
-		// Check if admin wants cleanup notifications (we can add this setting later)
-		if ( empty( $options['notify_admin_data_cleanup'] ) ) {
-			return;
-		}
+		$options = get_option( 'capture_options', array() );
 
 		$admin_email = isset( $options['admin_notification_email'] ) ? $options['admin_notification_email'] : get_option( 'admin_email' );
-		
+
 		if ( empty( $admin_email ) || ! is_email( $admin_email ) ) {
 			return;
 		}
 
 		$site_name = get_bloginfo( 'name' );
+		/* translators: %s: Site name */
 		$subject = sprintf( __( '[%s] Subscriber Data Cleanup Report', 'capture' ), $site_name );
-		
+
+		/* translators: 1: Number of deleted records, 2: Retention period in days, 3: Current date */
 		$message = sprintf(
-			__( "Automated data retention cleanup has been completed.\n\nDeleted Records: %d\nRetention Period: %d days\nDate: %s\n\nThis is an automated process based on your data retention settings.", 'capture' ),
+			__( "Automated data retention cleanup has been completed.\n\nDeleted Records: %1\$d\nRetention Period: %2\$d days\nDate: %3\$s\n\nThis is an automated process based on your data retention settings.", 'capture' ),
 			$deleted_count,
 			$retention_days,
 			current_time( 'mysql' )
 		);
 
 		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
-		
+
 		wp_mail( $admin_email, $subject, $message, $headers );
 	}
 
@@ -140,22 +144,23 @@ class WP_Capture_Data_Retention {
 	 * @return array Results of the cleanup operation.
 	 */
 	public function manual_cleanup() {
-		$options = get_option( 'wp_capture_options', array() );
+		$options        = get_option( 'capture_options', array() );
 		$retention_days = isset( $options['data_retention_days'] ) ? intval( $options['data_retention_days'] ) : 0;
 
 		if ( $retention_days <= 0 ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Data retention is set to indefinite. No cleanup performed.', 'capture' )
+				'message' => __( 'Data retention is set to indefinite. No cleanup performed.', 'capture' ),
 			);
 		}
 
-		// Run cleanup
+		// Run cleanup.
 		$this->cleanup_expired_data();
 
 		return array(
 			'success' => true,
-			'message' => sprintf( __( 'Data cleanup completed for records older than %d days.', 'capture' ), $retention_days )
+			/* translators: %d: Number of days */
+			'message' => sprintf( __( 'Data cleanup completed for records older than %d days.', 'capture' ), $retention_days ),
 		);
 	}
 
@@ -165,42 +170,37 @@ class WP_Capture_Data_Retention {
 	 * @return array Statistics about data that would be affected by retention policy.
 	 */
 	public function get_retention_stats() {
-		$options = get_option( 'wp_capture_options', array() );
+		$options        = get_option( 'capture_options', array() );
 		$retention_days = isset( $options['data_retention_days'] ) ? intval( $options['data_retention_days'] ) : 0;
 
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'capture_subscribers';
 
 		$stats = array(
-			'retention_days' => $retention_days,
+			'retention_days'    => $retention_days,
 			'total_subscribers' => 0,
-			'expired_count' => 0,
-			'next_cleanup' => wp_next_scheduled( 'wp_capture_data_retention_cleanup' )
+			'expired_count'     => 0,
+			'next_cleanup'      => wp_next_scheduled( 'capture_data_retention_cleanup' ),
 		);
 
-		// Check if table exists
-		if ( ! WP_Capture_Database::subscribers_table_exists() ) {
+		// Check if table exists.
+		if ( ! Database::subscribers_table_exists() ) {
 			return $stats;
 		}
 
-		// Get total subscriber count
-		$stats['total_subscribers'] = $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
+		// Get total subscriber count using properly constructed query.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is properly escaped
+		$stats['total_subscribers'] = $wpdb->get_var( 'SELECT COUNT(*) FROM `' . esc_sql( $table_name ) . '`' );
 
-		// Get count of expired records if retention is enabled
+		// Get count of expired records if retention is enabled.
 		if ( $retention_days > 0 ) {
 			$cutoff_date = gmdate( 'Y-m-d H:i:s', strtotime( "-{$retention_days} days" ) );
-			$stats['expired_count'] = $wpdb->get_var( 
-				$wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE date_subscribed < %s", $cutoff_date )
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is properly escaped, data is prepared
+			$stats['expired_count'] = $wpdb->get_var(
+				$wpdb->prepare( 'SELECT COUNT(*) FROM `' . esc_sql( $table_name ) . '` WHERE date_subscribed < %s', $cutoff_date )
 			);
 		}
 
 		return $stats;
 	}
-
-	/**
-	 * Unschedule cleanup event (for plugin deactivation).
-	 */
-	public static function unschedule_cleanup() {
-		wp_clear_scheduled_hook( 'wp_capture_data_retention_cleanup' );
-	}
-} 
+}
