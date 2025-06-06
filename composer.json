@@ -11,7 +11,7 @@
     "scripts": {
         "phpcs": "phpcs --standard=WordPress .",
         "phpcbf": "phpcbf --standard=WordPress .",
-        "test": "phpunit"
+        "test": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html coverage/"
     },
     "config": {
         "allow-plugins": {

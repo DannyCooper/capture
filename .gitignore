@@ -12,6 +12,7 @@ phpunit.xml.local
 tests/coverage/
 tests/reports/
 .phpunit.cache/
+coverage/
 
 # OS specific files
 .DS_Store
