@@ -40,3 +40,8 @@ wp-config-local.php
 # Temporary files
 *.tmp
 *.temp
+
+# Build files
+build/
+capture-*.zip
+test-api.php

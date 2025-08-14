@@ -164,8 +164,7 @@ class Subscriber {
 		global $wpdb;
 
 		$table_name = Database::get_subscribers_table_name();
-		$sql        = "SELECT * FROM {$table_name} WHERE id = %d";
-		$result     = $wpdb->get_row( $wpdb->prepare( $sql, $id ), ARRAY_A );
+		$result     = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . esc_sql( $table_name ) . ' WHERE id = %d', $id ), ARRAY_A );
 
 		return $result ? new self( $result ) : null;
 	}
@@ -181,8 +180,7 @@ class Subscriber {
 		global $wpdb;
 
 		$table_name = Database::get_subscribers_table_name();
-		$sql        = "SELECT * FROM {$table_name} WHERE email = %s AND form_id = %s";
-		$result     = $wpdb->get_row( $wpdb->prepare( $sql, $email, $form_id ), ARRAY_A );
+		$result     = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . esc_sql( $table_name ) . ' WHERE email = %s AND form_id = %s', $email, $form_id ), ARRAY_A );
 
 		return $result ? new self( $result ) : null;
 	}
@@ -286,14 +284,14 @@ class Subscriber {
 
 		$table_name = Database::get_subscribers_table_name();
 
-		// Build the full query string with placeholders
-		$sql = "SELECT COUNT(*) FROM {$table_name} WHERE {$where_clause}";
-
 		if ( ! empty( $where_values ) ) {
-			$count_query = $wpdb->prepare( $sql, $where_values );
-			return (int) $wpdb->get_var( $count_query );
+			$count_query = $wpdb->prepare(
+				'SELECT COUNT(*) FROM ' . esc_sql( $table_name ) . ' WHERE ' . $where_clause, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$where_values
+			);
+			return (int) $wpdb->get_var( $count_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		} else {
-			return (int) $wpdb->get_var( $sql );
+			return (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . esc_sql( $table_name ) . ' WHERE ' . $where_clause ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 	}
 
@@ -313,23 +311,24 @@ class Subscriber {
 
 		if ( $args['per_page'] === -1 ) {
 			// Export mode - get all records without LIMIT.
-			$sql = "SELECT * FROM {$table_name} WHERE {$where_clause} {$order_clause}";
-			
 			if ( ! empty( $where_values ) ) {
-				$query = $wpdb->prepare( $sql, $where_values );
-				return $wpdb->get_results( $query, ARRAY_A );
+				$query = $wpdb->prepare(
+					'SELECT * FROM ' . esc_sql( $table_name ) . ' WHERE ' . $where_clause . ' ' . $order_clause, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+					$where_values
+				);
+				return $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			} else {
-				return $wpdb->get_results( $sql, ARRAY_A );
+				return $wpdb->get_results( 'SELECT * FROM ' . esc_sql( $table_name ) . ' WHERE ' . $where_clause . ' ' . $order_clause, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			}
 		} else {
 			// Paginated mode - use LIMIT and OFFSET.
-			$offset = ( $args['page'] - 1 ) * $args['per_page'];
-			$sql    = "SELECT * FROM {$table_name} WHERE {$where_clause} {$order_clause} LIMIT %d OFFSET %d";
-			
+			$offset       = ( $args['page'] - 1 ) * $args['per_page'];
 			$query_values = array_merge( $where_values, array( $args['per_page'], $offset ) );
-			$query        = $wpdb->prepare( $sql, $query_values );
-			
-			return $wpdb->get_results( $query, ARRAY_A );
+			$query        = $wpdb->prepare(
+				'SELECT * FROM ' . esc_sql( $table_name ) . ' WHERE ' . $where_clause . ' ' . $order_clause . ' LIMIT %d OFFSET %d', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$query_values
+			);
+			return $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 	}
 
@@ -340,13 +339,11 @@ class Subscriber {
 	 * @return string ORDER BY clause.
 	 */
 	private static function build_order_clause( $args ) {
-		// Whitelist allowed columns to prevent SQL injection.
 		$allowed_orderby = array( 'id', 'email', 'name', 'form_id', 'date_subscribed', 'status' );
-		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'date_subscribed';
+		$orderby         = in_array( $args['orderby'], $allowed_orderby ) ? $args['orderby'] : 'date_subscribed';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
 
-		// Since these are whitelisted values, they're safe to use directly.
-		return "ORDER BY {$orderby} {$order}";
+		return 'ORDER BY ' . esc_sql( $orderby ) . ' ' . esc_sql( $order );
 	}
 
 	/**

@@ -1,0 +1,23 @@
+/* WP Capture Admin Subscribers Page Styles */
+
+.capture-status {
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.capture-status-subscribed {
+	background: #d4edda;
+	color: #155724;
+}
+
+.capture-status-unsubscribed {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+#cb-select-all {
+	margin: 0;
+}

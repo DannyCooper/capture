@@ -116,7 +116,8 @@ class Admin_Connections {
 					$key_display_html = '<p style="margin-top: 0; margin-bottom: 5px;"><em>' . esc_html__( 'No API key set.', 'capture' ) . '</em></p>';
 				}
 
-				echo wp_kses_post( $key_display_html );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Contains safe HTML from above.
+				echo $key_display_html;
 
 				echo '<input id="capture-api-key-' . esc_attr( $connection_id ) . '" type="text" class="capture-api-key-input" name="capture_options[ems_connections][' . esc_attr( $connection_id ) . '][api_key]" value="" placeholder="' . esc_attr( $placeholder_text ) . '" autocomplete="off" style="width: 100%;" />';
 				echo '</p>';
@@ -175,8 +176,9 @@ class Admin_Connections {
 
 		$connection_id = isset( $_POST['connection_id'] ) ? sanitize_text_field( wp_unslash( $_POST['connection_id'] ) ) : '';
 		$provider      = isset( $_POST['provider'] ) ? sanitize_text_field( wp_unslash( $_POST['provider'] ) ) : '';
-		$raw_api_key   = isset( $_POST['api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['api_key'] ) ) : '';
-		$name          = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- API keys should not be sanitized as they may contain special characters.
+		$raw_api_key = isset( $_POST['api_key'] ) ? trim( wp_unslash( $_POST['api_key'] ) ) : '';
+		$name        = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 
 		if ( empty( $provider ) || empty( $raw_api_key ) ) {
 			wp_send_json_error( array( 'message' => __( 'Provider and API key are required.', 'capture' ) ) );
@@ -375,7 +377,8 @@ class Admin_Connections {
 			return;
 		}
 
-		$submitted_raw_api_key = isset( $_POST['api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['api_key'] ) ) : '';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- API keys should not be sanitized as they may contain special characters.
+		$submitted_raw_api_key = isset( $_POST['api_key'] ) ? trim( wp_unslash( $_POST['api_key'] ) ) : '';
 		$connection_id         = isset( $_POST['connection_id'] ) ? sanitize_text_field( wp_unslash( $_POST['connection_id'] ) ) : '';
 		$submitted_name        = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 

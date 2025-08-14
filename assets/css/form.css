@@ -1,0 +1,96 @@
+/* WP Capture Form Block Base Styles */
+
+.capture-form--horizontal {
+	flex-direction: row;
+	align-items: flex-end;
+}
+
+.capture-form__input {
+	padding: 10px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 16px;
+	line-height: 1.4;
+	transition: border-color 0.2s ease;
+}
+
+.capture-form__input:focus {
+	outline: none;
+	border-color: #0073aa;
+	box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.1);
+}
+
+.capture-form__button {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 4px;
+	font-size: 16px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.capture-form__button:focus {
+	outline: 2px solid #0073aa;
+	outline-offset: 2px;
+}
+
+.capture-form__privacy-policy {
+	font-size: 14px;
+	line-height: 1.4;
+	margin-top: 10px;
+}
+
+.capture-form__privacy-policy a {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.capture-form-error {
+	color: #d63638;
+	background: #fef0f0;
+	border: 1px solid #f0a0a0;
+	padding: 10px;
+	border-radius: 4px;
+	margin-bottom: 20px;
+}
+
+/* Core styles disabled variant */
+.capture-form--no-core-styles {
+	/* Remove all base styling when core styles are disabled */
+}
+
+.capture-form--no-core-styles .capture-form__input,
+.capture-form--no-core-styles .capture-form__button {
+	all: unset;
+}
+
+.capture-form--no-core-styles .capture-form__input {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.capture-form--no-core-styles .capture-form__button {
+	display: inline-block;
+	cursor: pointer;
+}
+
+/* Form messages (success/error) */
+.capture-form .message {
+	margin-top: 10px;
+	padding: 10px;
+	border-radius: 4px;
+}
+
+.capture-form .message.success {
+	background-color: #dff0d8;
+	border: 1px solid #d6e9c6;
+	color: #3c763d;
+}
+
+.capture-form .message.error {
+	background-color: #f2dede;
+	border: 1px solid #ebccd1;
+	color: #a94442;
+}

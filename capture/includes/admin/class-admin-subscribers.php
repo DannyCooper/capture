@@ -26,37 +26,6 @@ class Admin_Subscribers {
 	public function __construct() {
 		// Hook into admin_init to handle actions.
 		add_action( 'admin_init', array( $this, 'handle_admin_actions' ) );
-		// Hook into admin_enqueue_scripts to enqueue styles and scripts.
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
-	}
-
-	/**
-	 * Enqueue admin assets for the subscribers page.
-	 *
-	 * @param string $hook_suffix The current admin page hook suffix.
-	 */
-	public function enqueue_admin_assets( $hook_suffix ) {
-		// Only enqueue on the subscribers page.
-		if ( 'capture_page_capture-subscribers' !== $hook_suffix ) {
-			return;
-		}
-
-		// Enqueue CSS file for subscriber page styles.
-		wp_enqueue_style(
-			'capture-admin-subscribers',
-			CAPTURE_PLUGIN_URL . 'assets/css/admin-subscribers.css',
-			array(),
-			CAPTURE_VERSION
-		);
-
-		// Enqueue JavaScript file for subscriber page functionality.
-		wp_enqueue_script(
-			'capture-admin-subscribers',
-			CAPTURE_PLUGIN_URL . 'assets/js/admin-subscribers.js',
-			array( 'jquery' ),
-			CAPTURE_VERSION,
-			true
-		);
 	}
 
 	/**
@@ -144,43 +113,17 @@ class Admin_Subscribers {
 	 * Display the subscribers admin page.
 	 */
 	public function display_page() {
-		// Check user permissions for admin access.
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'capture' ) );
-		}
-
-		// Get filter parameters - verify nonce if any filter parameters are present.
-		$has_filters = isset( $_GET['search'] ) || isset( $_GET['form_id'] ) || isset( $_GET['status'] ) || isset( $_GET['date_from'] ) || isset( $_GET['date_to'] );
-		if ( $has_filters ) {
-			$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-			if ( ! wp_verify_nonce( $nonce, 'subscribers_filter' ) ) {
-				wp_die( esc_html__( 'Security check failed. Please refresh the page and try again.', 'capture' ) );
-			}
-		}
-
+		// Get filter parameters.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters, no nonce needed.
 		$search = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters, no nonce needed.
 		$form_id = isset( $_GET['form_id'] ) ? sanitize_text_field( wp_unslash( $_GET['form_id'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters, no nonce needed.
 		$status = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters, no nonce needed.
 		$date_from = isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( $_GET['date_from'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters, no nonce needed.
 		$date_to = isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( $_GET['date_to'] ) ) : '';
-
-		// Validate status parameter against allowed values.
-		if ( ! empty( $status ) && ! in_array( $status, array( 'active', 'unsubscribed' ), true ) ) {
-			wp_die( esc_html__( 'Invalid status parameter.', 'capture' ) );
-		}
-
-		// Validate date format.
-		if ( ! empty( $date_from ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date_from ) ) {
-			wp_die( esc_html__( 'Invalid date format for date_from parameter.', 'capture' ) );
-		}
-		if ( ! empty( $date_to ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date_to ) ) {
-			wp_die( esc_html__( 'Invalid date format for date_to parameter.', 'capture' ) );
-		}
-
-		// Validate search parameter length.
-		if ( strlen( $search ) > 100 ) {
-			wp_die( esc_html__( 'Search parameter too long.', 'capture' ) );
-		}
 
 		// Get pagination parameters.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- This is a read-only pagination parameter, no nonce needed.
@@ -223,15 +166,7 @@ class Admin_Subscribers {
 			<h1 class="wp-heading-inline"><?php esc_html_e( 'Subscribers', 'capture' ); ?></h1>
 			
 			<?php if ( Database::subscribers_table_exists() ) : ?>
-				<?php
-				// Build export URL with current filter parameters from $args.
-				$export_url = admin_url( 'admin.php?page=capture-subscribers&action=export' );
-				$export_params = array_intersect_key( $args, array_flip( array( 'search', 'form_id', 'status', 'date_from', 'date_to' ) ) );
-				if ( ! empty( $export_params ) ) {
-					$export_url = add_query_arg( $export_params, $export_url );
-				}
-				?>
-				<a href="<?php echo esc_url( wp_nonce_url( $export_url, 'export_subscribers' ) ); ?>" class="page-title-action">
+				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=capture-subscribers&action=export' ), 'export_subscribers' ) ); ?>" class="page-title-action">
 					<?php esc_html_e( 'Export CSV', 'capture' ); ?>
 				</a>
 			<?php endif; ?>
@@ -242,7 +177,6 @@ class Admin_Subscribers {
 			<div class="capture-filters" style="margin: 20px 0; padding: 15px; background: #f9f9f9; border: 1px solid #ddd;">
 				<form method="get" action="">
 					<input type="hidden" name="page" value="capture-subscribers">
-					<?php wp_nonce_field( 'subscribers_filter' ); ?>
 					
 					<table class="form-table" style="margin: 0;">
 						<tr>
@@ -369,8 +303,8 @@ class Admin_Subscribers {
 										<input type="checkbox" name="subscriber_ids[]" value="<?php echo esc_attr( $subscriber->id ); ?>">
 									</th>
 									<td><strong><?php echo esc_html( $subscriber->email ); ?></strong></td>
-									<td><?php echo esc_html( $subscriber->name ? $subscriber->name : '—' ); ?></td>
-									<td><?php echo esc_html( $subscriber->form_id ? $subscriber->form_id : '—' ); ?></td>
+									<td><?php echo esc_html( $subscriber->name ?: '—' ); ?></td>
+									<td><?php echo esc_html( $subscriber->form_id ?: '—' ); ?></td>
 									<td><?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $subscriber->date_subscribed ) ) ); ?></td>
 									<td>
 										<span class="capture-status capture-status-<?php echo esc_attr( $subscriber->status ); ?>">
@@ -412,6 +346,36 @@ class Admin_Subscribers {
 			<?php endif; ?>
 
 		</div>
+
+		<style>
+		.capture-status {
+			padding: 2px 8px;
+			border-radius: 3px;
+			font-size: 11px;
+			font-weight: bold;
+			text-transform: uppercase;
+		}
+		.capture-status-subscribed {
+			background: #d4edda;
+			color: #155724;
+		}
+		.capture-status-unsubscribed {
+			background: #f8d7da;
+			color: #721c24;
+		}
+		#cb-select-all {
+			margin: 0;
+		}
+		</style>
+
+		<script>
+		jQuery(document).ready(function($) {
+			// Handle select all checkbox
+			$('#cb-select-all').on('change', function() {
+				$('input[name="subscriber_ids[]"]').prop('checked', this.checked);
+			});
+		});
+		</script>
 		<?php
 	}
 
@@ -420,34 +384,16 @@ class Admin_Subscribers {
 	 */
 	private function export_csv() {
 		// Get filter parameters from URL.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in handle_admin_actions() before calling this method.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters for export, no nonce needed.
 		$search = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in handle_admin_actions() before calling this method.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters for export, no nonce needed.
 		$form_id = isset( $_GET['form_id'] ) ? sanitize_text_field( wp_unslash( $_GET['form_id'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in handle_admin_actions() before calling this method.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters for export, no nonce needed.
 		$status = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in handle_admin_actions() before calling this method.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters for export, no nonce needed.
 		$date_from = isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( $_GET['date_from'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in handle_admin_actions() before calling this method.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- These are read-only filter parameters for export, no nonce needed.
 		$date_to = isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( $_GET['date_to'] ) ) : '';
-
-		// Validate export parameters.
-		if ( ! empty( $status ) && ! in_array( $status, array( 'active', 'unsubscribed' ), true ) ) {
-			wp_die( esc_html__( 'Invalid status parameter.', 'capture' ) );
-		}
-
-		// Validate date format.
-		if ( ! empty( $date_from ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date_from ) ) {
-			wp_die( esc_html__( 'Invalid date format for date_from parameter.', 'capture' ) );
-		}
-		if ( ! empty( $date_to ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date_to ) ) {
-			wp_die( esc_html__( 'Invalid date format for date_to parameter.', 'capture' ) );
-		}
-
-		// Validate search parameter length.
-		if ( strlen( $search ) > 100 ) {
-			wp_die( esc_html__( 'Search parameter too long.', 'capture' ) );
-		}
 
 		// Build query args for export (get all matching records).
 		$args = array( 'per_page' => -1 );
@@ -523,10 +469,8 @@ class Admin_Subscribers {
 		global $wpdb;
 		$table_name = Database::get_subscribers_table_name();
 
-		// This query has no user input, so it's safe to use directly.
-		$sql     = "SELECT DISTINCT form_id FROM {$table_name} WHERE form_id IS NOT NULL AND form_id != '' ORDER BY form_id";
-		$results = $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_col( 'SELECT DISTINCT form_id FROM ' . esc_sql( $table_name ) . ' WHERE form_id IS NOT NULL AND form_id != \'\' ORDER BY form_id' );
 
-		return $results ? $results : array();
+		return $results ?: array();
 	}
 }

@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test Encryption class fallback and error scenarios.
- * 
+ *
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  */
@@ -32,20 +32,20 @@ class EncryptionFallbackTest extends TestCase {
 		require_once 'includes/class-encryption.php';
 
 		$reflection = new ReflectionClass( 'Capture\Encryption' );
-		
+
 		// Test get_default_key method
 		$get_key_method = $reflection->getMethod( 'get_default_key' );
 		$get_key_method->setAccessible( true );
 		$key = $get_key_method->invoke( null );
-		
+
 		// Should return WordPress fallback key
 		$this->assertEquals( 'wordpress-logged-in-key-for-testing', $key );
-		
+
 		// Test get_default_salt method
 		$get_salt_method = $reflection->getMethod( 'get_default_salt' );
 		$get_salt_method->setAccessible( true );
 		$salt = $get_salt_method->invoke( null );
-		
+
 		// Should return WordPress fallback salt
 		$this->assertEquals( 'wordpress-nonce-salt-for-testing', $salt );
 	}
@@ -58,20 +58,20 @@ class EncryptionFallbackTest extends TestCase {
 		require_once 'includes/class-encryption.php';
 
 		$reflection = new ReflectionClass( 'Capture\Encryption' );
-		
+
 		// Test get_default_key method
 		$get_key_method = $reflection->getMethod( 'get_default_key' );
 		$get_key_method->setAccessible( true );
 		$key = $get_key_method->invoke( null );
-		
+
 		// Should return insecure fallback
 		$this->assertEquals( 'this-is-not-a-secure-key', $key );
-		
+
 		// Test get_default_salt method
 		$get_salt_method = $reflection->getMethod( 'get_default_salt' );
 		$get_salt_method->setAccessible( true );
 		$salt = $get_salt_method->invoke( null );
-		
+
 		// Should return insecure fallback
 		$this->assertEquals( 'this-is-not-a-secure-salt', $salt );
 	}
@@ -84,7 +84,7 @@ class EncryptionFallbackTest extends TestCase {
 		require_once 'includes/class-encryption.php';
 
 		$result = \Capture\Encryption::is_properly_configured();
-		
+
 		// Should return false because we're using insecure fallbacks
 		$this->assertFalse( $result );
 	}
@@ -104,7 +104,7 @@ class EncryptionFallbackTest extends TestCase {
 		require_once 'includes/class-encryption.php';
 
 		$result = \Capture\Encryption::is_properly_configured();
-		
+
 		// Should return true because WordPress keys are considered secure
 		$this->assertTrue( $result );
 	}
@@ -124,10 +124,10 @@ class EncryptionFallbackTest extends TestCase {
 		require_once 'includes/class-encryption.php';
 
 		$test_value = 'test@example.com';
-		$encrypted = \Capture\Encryption::encrypt( $test_value );
-		$decrypted = \Capture\Encryption::decrypt( $encrypted );
+		$encrypted  = \Capture\Encryption::encrypt( $test_value );
+		$decrypted  = \Capture\Encryption::decrypt( $encrypted );
 
 		$this->assertEquals( $test_value, $decrypted );
 		$this->assertNotEquals( $test_value, $encrypted );
 	}
-} 
+}

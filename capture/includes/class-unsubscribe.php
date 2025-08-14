@@ -26,7 +26,7 @@ class Unsubscribe {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'handle_unsubscribe_request' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_unsubscribe_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'output_unsubscribe_styles' ) );
 	}
 
 	/**
@@ -286,19 +286,120 @@ class Unsubscribe {
 	}
 
 	/**
-	 * Enqueue styles for the unsubscribe page.
+	 * Output inline styles for the unsubscribe page.
 	 */
-	public function enqueue_unsubscribe_styles() {
+	public function output_unsubscribe_styles() {
 		if ( ! isset( $_GET['capture_unsubscribe'] ) ) {
 			return;
 		}
 
-		// Enqueue the unsubscribe CSS file.
-		wp_enqueue_style(
-			'capture-unsubscribe',
-			CAPTURE_PLUGIN_URL . 'assets/css/unsubscribe.css',
-			array(),
-			CAPTURE_VERSION
-		);
+		?>
+		<style type="text/css">
+		.capture-unsubscribe-page {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			line-height: 1.6;
+			color: #333;
+			background-color: #f8f9fa;
+			margin: 0;
+			padding: 0;
+		}
+
+		.capture-unsubscribe-container {
+			max-width: 600px;
+			margin: 50px auto;
+			background: #fff;
+			border-radius: 8px;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+			overflow: hidden;
+		}
+
+		.capture-unsubscribe-header {
+			background: #0073aa;
+			color: #fff;
+			padding: 30px;
+			text-align: center;
+		}
+
+		.capture-unsubscribe-header h1 {
+			margin: 0 0 10px 0;
+			font-size: 24px;
+			font-weight: 600;
+		}
+
+		.capture-unsubscribe-header h2 {
+			margin: 0;
+			font-size: 18px;
+			font-weight: 400;
+			opacity: 0.9;
+		}
+
+		.capture-unsubscribe-content {
+			padding: 40px 30px;
+		}
+
+		.capture-message {
+			display: flex;
+			align-items: flex-start;
+			padding: 20px;
+			border-radius: 6px;
+			margin-bottom: 30px;
+		}
+
+		.capture-message-success {
+			background: #d4edda;
+			border: 1px solid #c3e6cb;
+			color: #155724;
+		}
+
+		.capture-message-error {
+			background: #f8d7da;
+			border: 1px solid #f5c6cb;
+			color: #721c24;
+		}
+
+		.capture-icon {
+			font-size: 20px;
+			margin-right: 12px;
+			margin-top: 2px;
+		}
+
+		.capture-message p {
+			margin: 0;
+			font-size: 16px;
+		}
+
+		.capture-actions {
+			text-align: center;
+		}
+
+		.capture-button {
+			display: inline-block;
+			background: #0073aa;
+			color: #fff;
+			padding: 12px 24px;
+			text-decoration: none;
+			border-radius: 4px;
+			font-size: 16px;
+			transition: background-color 0.2s ease;
+		}
+
+		.capture-button:hover {
+			background: #005a87;
+			color: #fff;
+		}
+
+		@media (max-width: 640px) {
+			.capture-unsubscribe-container {
+				margin: 20px;
+				max-width: none;
+			}
+			
+			.capture-unsubscribe-header,
+			.capture-unsubscribe-content {
+				padding: 20px;
+			}
+		}
+		</style>
+		<?php
 	}
 }

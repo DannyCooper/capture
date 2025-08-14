@@ -4,7 +4,7 @@ Tags: email, forms, subscribers, email marketing, newsletter
 Requires at least: 5.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,8 @@ Capture is a powerful WordPress plugin designed to help you build your email lis
 * Mailerlite
 * Mailchimp
 * Kit (previously known as ConvertKit)
+* ActiveCampaign
+* GetResponse
 
 **Perfect For:**
 
@@ -43,39 +45,6 @@ Capture is a powerful WordPress plugin designed to help you build your email lis
 1. **With EMS Connected**: Subscribers are automatically sent to your configured email marketing service
 2. **Without EMS**: Subscribers are stored securely in your WordPress database with full admin management tools
 3. **Always Functional**: Forms work regardless of your EMS connection status
-
-== External services ==
-
-This plugin connects to third-party Email Marketing Service (EMS) APIs to synchronize subscriber data when an EMS integration is configured. The plugin only connects to these services when users explicitly configure their API credentials in the plugin settings.
-
-When an EMS connection is configured, the plugin sends subscriber information (email address and optional first name) to the selected email marketing service each time a user submits a subscription form.
-
-**Supported External Services:**
-
-* **ConvertKit (Kit)**: https://api.convertkit.com/v3/
-  - Used for: Validating API credentials, retrieving available forms/lists, and subscribing users
-  - Data sent: Email address, first name (optional), custom fields, and tags
-  - Privacy policy: https://convertkit.com/privacy
-  - Terms of service: https://convertkit.com/terms
-
-* **Mailchimp**: https://{dc}.api.mailchimp.com/3.0/
-  - Used for: Validating API credentials, retrieving available lists, and subscribing users
-  - Data sent: Email address and first name (optional)
-  - Privacy policy: https://www.intuit.com/privacy/statement/
-  - Terms of service: https://www.intuit.com/legal/
-
-* **MailerLite**: https://connect.mailerlite.com/api
-  - Used for: Validating API credentials, retrieving available groups/lists, and subscribing users
-  - Data sent: Email address and first name (optional)
-  - Privacy policy: https://www.mailerlite.com/legal/privacy-policy
-  - Terms of service: https://www.mailerlite.com/legal/terms-of-use
-
-**Important Notes:**
-
-- No data is sent to external services unless users explicitly configure an EMS connection
-- When no EMS is configured, all subscriber data remains stored locally in your WordPress database
-- Users can disable EMS integration at any time, reverting to local-only storage
-- The plugin respects user privacy and only transmits data necessary for email marketing functionality
 
 == Installation ==
 
@@ -106,10 +75,6 @@ Yes, Capture includes privacy-compliant features including data retention settin
 
 Absolutely! The plugin includes a native WordPress block with extensive styling and layout customization options.
 
-= Can I contribute to the plugin? =
-
-Yes! Please feel free to contribute to the plugin by submitting a pull request or opening an issue. You can find the repository [here](https://github.com/dannycooper/capture).
-
 = What happens to my data if I deactivate the plugin? =
 
 Your subscriber data is safely preserved in your WordPress database.
@@ -123,27 +88,6 @@ Your subscriber data is safely preserved in your WordPress database.
 5. Form display on frontend
 
 == Changelog ==
-
-= 1.0.4 =
-* Removed data retention system for simplified data handling
-* Enhanced admin interface with new subscriber management tools
-* Added dedicated CSS and JS assets for improved styling and functionality
-* Fixed wp_kses_post stripping form elements in form-embed block
-* Improved form rendering to allow necessary form HTML elements
-* Major code optimization and cleanup across admin classes
-* Updated EMS service implementations for better reliability
-* Enhanced testing framework with improved bootstrap and unit tests
-* Updated build system and dependency management
-* Improved unsubscribe functionality with dedicated assets
-* Code formatting improvements with consistent styling standards
-
-= 1.0.3 =
-* Added MailerLite EMS integration support
-* Simplified form block structure (renamed wp-capture-form to form, wp-capture-form-embed to form-embed)
-* Enhanced admin analytics and subscriber management
-* Improved unsubscribe functionality
-* Updated EMS service implementations
-* Better testing framework integration
 
 = 1.0.2 =
 * Major block architecture refactoring for improved performance and maintainability

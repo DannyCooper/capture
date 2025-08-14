@@ -9,9 +9,10 @@
         "phpunit/phpunit": "^9.0"
     },
     "scripts": {
-        "phpcs": "phpcs --standard=WordPress .",
-        "phpcbf": "phpcbf --standard=WordPress .",
-        "test": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html coverage/"
+        "phpcs": "php vendor/bin/phpcs --standard=phpcs.xml .",
+        "phpcbf": "php vendor/bin/phpcbf --standard=phpcs.xml .",
+        "test": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html coverage/",
+        "build": "./build.sh"
     },
     "config": {
         "allow-plugins": {

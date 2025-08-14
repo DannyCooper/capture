@@ -90,15 +90,9 @@ class Admin {
 	 * @param string $hook_suffix The current admin page hook suffix.
 	 */
 	public function enqueue_admin_scripts( $hook_suffix ) {
-		// Check if we're on any Capture admin page.
-		$capture_pages = array(
-			'toplevel_page_capture',
-			'capture_page_capture-subscribers',
-			'capture_page_capture-settings',
-			'capture_page_capture-analytics',
-		);
-
-		if ( ! in_array( $hook_suffix, $capture_pages, true ) ) {
+		// Ensure admin_page_hooks is populated if needed by other logic.
+		// For now, we collect all unique hooks from the menu registration.
+		if ( ! in_array( $hook_suffix, array_unique( $this->admin_page_hooks ), true ) ) {
 			return;
 		}
 

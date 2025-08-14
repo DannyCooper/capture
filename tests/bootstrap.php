@@ -33,4 +33,4 @@ if ( ! function_exists( 'error_log' ) ) {
 require_once CAPTURE_PLUGIN_DIR . 'includes/class-encryption.php';
 
 // Set up test environment.
-echo "Bootstrap complete. Running tests...\n"; 
+echo "Bootstrap complete. Running tests...\n";
