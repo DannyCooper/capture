@@ -18,6 +18,10 @@ if ( ! $form_id ) {
 
 $form = get_post( $form_id );
 
+if ( ! $form || 'capture_form' !== $form->post_type ) {
+	return '';
+}
+
 // Allow form elements in addition to post content.
 $allowed_html = wp_kses_allowed_html( 'post' );
 

@@ -51,13 +51,38 @@ class Shortcodes {
 			return '';
 		}
 
-		// Start output buffering.
-		ob_start();
+		// Allow form elements in addition to post content.
+		$allowed_html = wp_kses_allowed_html( 'post' );
 
-		// Include the form template.
-		include CAPTURE_PLUGIN_DIR . 'templates/form.php';
+		$allowed_html['form'] = array(
+			'class'  => true,
+			'data-*' => true,
+			'id'     => true,
+			'method' => true,
+			'action' => true,
+		);
 
-		// Return the buffered content.
-		return ob_get_clean();
+		$allowed_html['input'] = array(
+			'type'         => true,
+			'class'        => true,
+			'autocomplete' => true,
+			'aria-label'   => true,
+			'name'         => true,
+			'placeholder'  => true,
+			'required'     => true,
+			'value'        => true,
+			'id'           => true,
+		);
+
+		$allowed_html['button'] = array(
+			'type'   => true,
+			'class'  => true,
+			'id'     => true,
+			'data-*' => true,
+		);
+
+		return wp_kses( do_blocks( $form->post_content ), $allowed_html );
 	}
 }
+
+new Shortcodes();

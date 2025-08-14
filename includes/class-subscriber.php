@@ -60,8 +60,6 @@ class Subscriber {
 	 */
 	public $date_subscribed;
 
-
-
 	/**
 	 * Subscriber status.
 	 *

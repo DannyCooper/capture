@@ -189,12 +189,6 @@ The plugin provides various hooks and filters for developers to extend functiona
 
 The plugin creates a `capture_subscribers` table to store local subscriptions with proper indexing for performance.
 
-**REST API:**
+**Source Code:**
 
-Capture includes REST API endpoints for subscription handling and admin management:
-
-* `POST /wp-json/capture/v1/subscribe` - Submit subscription
-* `GET /wp-json/capture/v1/admin/subscribers` - Get subscribers (admin only)
-* `DELETE /wp-json/capture/v1/admin/subscribers/{id}` - Delete subscriber (admin only)
-
-For more technical documentation, visit the [GitHub repository](https://github.com/dannycooper/capture).
+To view the unminified source code, visit the [GitHub repository](https://github.com/dannycooper/capture).

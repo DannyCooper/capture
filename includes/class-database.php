@@ -96,7 +96,7 @@ class Database {
 	public static function drop_subscribers_table() {
 		global $wpdb;
 		$table_name = self::get_subscribers_table_name();
-		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %s', $table_name ) );
+		$wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
 		\delete_option( 'capture_db_version' );
 	}
 }

@@ -99,6 +99,9 @@ class Core {
 
 		// Load admin classes.
 		require_once CAPTURE_PLUGIN_DIR . 'includes/admin/class-admin.php';
+
+		// Load shortcodes.
+		require_once CAPTURE_PLUGIN_DIR . 'includes/class-shortcodes.php';
 	}
 
 	/**
