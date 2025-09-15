@@ -10,7 +10,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-$form_id = isset( $attributes['formId'] ) ? $attributes['formId'] : null;
+$form_id = isset( $attributes['formId'] ) ? absint( $attributes['formId'] ) : 0;
 
 if ( ! $form_id ) {
 	return '';

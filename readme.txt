@@ -4,7 +4,7 @@ Tags: email, forms, subscribers, email marketing, newsletter
 Requires at least: 5.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -123,6 +123,9 @@ Your subscriber data is safely preserved in your WordPress database.
 5. Form display on frontend
 
 == Changelog ==
+
+= 1.0.5 =
+* Fix typo in plugin URI
 
 = 1.0.4 =
 * Removed data retention system for simplified data handling

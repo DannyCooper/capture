@@ -118,48 +118,109 @@ class Admin_Connections {
 
 				echo wp_kses_post( $key_display_html );
 
-				echo '<input id="capture-api-key-' . esc_attr( $connection_id ) . '" type="text" class="capture-api-key-input" name="capture_options[ems_connections][' . esc_attr( $connection_id ) . '][api_key]" value="" placeholder="' . esc_attr( $placeholder_text ) . '" autocomplete="off" style="width: 100%;" />';
-				echo '</p>';
+				$provider = isset( $connection['provider'] ) ? $connection['provider'] : '';
+				?>
+				<br/>
+				<input id="capture-api-key-<?php echo esc_attr( $connection_id ); ?>" 
+				       type="text" 
+				       class="capture-api-key-input" 
+				       name="capture_options[ems_connections][<?php echo esc_attr( $connection_id ); ?>][api_key]" 
+				       value="" 
+				       placeholder="<?php echo esc_attr( $placeholder_text ); ?>" 
+				       autocomplete="off" 
+				       style="width: 100%;" />
+				</p>
 
-				echo '<div class="capture-connection-actions">';
-				echo '<button type="button" class="button button-primary capture-update-connection" data-id="' . esc_attr( $connection_id ) . '">' . esc_html__( 'Update', 'capture' ) . '</button> ';
-				echo '<button type="button" class="button capture-test-connection" data-id="' . esc_attr( $connection_id ) . '" data-provider="' . esc_attr( isset( $connection['provider'] ) ? $connection['provider'] : '' ) . '">' . esc_html__( 'Test Connection', 'capture' ) . '</button> ';
-				echo '<button type="button" class="button capture-remove-connection" data-id="' . esc_attr( $connection_id ) . '">' . esc_html__( 'Remove', 'capture' ) . '</button>';
-				echo '</div>';
+				<div class="capture-connection-actions">
+					<button type="button" 
+					        class="button button-primary capture-update-connection" 
+					        data-id="<?php echo esc_attr( $connection_id ); ?>">
+						<?php esc_html_e( 'Update', 'capture' ); ?>
+					</button>
+					<button type="button" 
+					        class="button capture-test-connection" 
+					        data-id="<?php echo esc_attr( $connection_id ); ?>" 
+					        data-provider="<?php echo esc_attr( $provider ); ?>">
+						<?php esc_html_e( 'Test Connection', 'capture' ); ?>
+					</button>
+					<button type="button" 
+					        class="button capture-remove-connection" 
+					        data-id="<?php echo esc_attr( $connection_id ); ?>">
+						<?php esc_html_e( 'Remove', 'capture' ); ?>
+					</button>
+				</div>
 
-				echo '<div class="capture-connection-status"></div>';
-				echo '</div>';
+				<div class="capture-connection-status"></div>
+				</div>
+				<?php
 			}
 		}
-		echo '</div>';
+		?>
+		</div>
 
-		echo '<button type="button" class="button button-secondary" id="capture-add-new-connection">' . esc_html__( 'Add New Connection', 'capture' ) . '</button>';
+		<button type="button" class="button button-secondary" id="capture-add-new-connection">
+			<?php esc_html_e( 'Add New Connection', 'capture' ); ?>
+		</button>
 
-		echo '<script type="text/html" id="capture-connection-template">';
-		echo '<div class="capture-connection-item is-new" data-id="NEW_KEY_PLACEHOLDER">';
-		echo '<h4>' . esc_html__( 'New Connection', 'capture' ) . '</h4>';
+		<script type="text/html" id="capture-connection-template">
+			<div class="capture-connection-item is-new" data-id="NEW_KEY_PLACEHOLDER">
+				<h4><?php esc_html_e( 'New Connection', 'capture' ); ?></h4>
 
-		echo '<p><label for="capture-provider-NEW_KEY_PLACEHOLDER">' . esc_html__( 'Provider', 'capture' ) . ':</label><br/>';
-		echo '<select id="capture-provider-NEW_KEY_PLACEHOLDER" name="capture_options[ems_connections][NEW_KEY_PLACEHOLDER][provider]" class="capture-provider-select">';
-		echo '<option value="">' . esc_html__( '-- Select Provider --', 'capture' ) . '</option>';
+				<p>
+					<label for="capture-provider-NEW_KEY_PLACEHOLDER">
+						<?php esc_html_e( 'Provider', 'capture' ); ?>:
+					</label><br/>
+					<select id="capture-provider-NEW_KEY_PLACEHOLDER" 
+					        name="capture_options[ems_connections][NEW_KEY_PLACEHOLDER][provider]" 
+					        class="capture-provider-select">
+						<option value=""><?php esc_html_e( '-- Select Provider --', 'capture' ); ?></option>
+						<?php
+						$available_providers = $this->plugin->get_registered_services();
+						foreach ( $available_providers as $providor ) : ?>
+							<option value="<?php echo esc_attr( $providor['key'] ); ?>">
+								<?php echo esc_html( $providor['name'] ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</p>
 
-		$available_providers = $this->plugin->get_registered_services();
-		foreach ( $available_providers as $providor ) {
-			echo '<option value="' . esc_attr( $providor['key'] ) . '">' . esc_html( $providor['name'] ) . '</option>';
-		}
-		echo '</select></p>';
-		echo '<p><label for="capture-name-NEW_KEY_PLACEHOLDER">' . esc_html__( 'Connection Name (Optional)', 'capture' ) . ':</label><br/>';
-		echo '<input id="capture-name-NEW_KEY_PLACEHOLDER" type="text" name="capture_options[ems_connections][NEW_KEY_PLACEHOLDER][name]" placeholder="' . esc_attr__( 'e.g., Newsletter Opt-ins', 'capture' ) . '" /></p>';
-		echo '<p><label for="capture-api-key-NEW_KEY_PLACEHOLDER">' . esc_html__( 'API Key', 'capture' ) . ':</label><br/>';
-		echo '<input id="capture-api-key-NEW_KEY_PLACEHOLDER" type="text" class="capture-api-key-input" name="capture_options[ems_connections][NEW_KEY_PLACEHOLDER][api_key]" /></p>';
-		echo '<div class="capture-connection-actions">';
-		echo '<button type="button" class="button capture-save-test-connection" data-id="NEW_KEY_PLACEHOLDER">' . esc_html__( 'Save & Test', 'capture' ) . '</button> ';
-		echo '<button type="button" class="button capture-remove-connection" data-id="NEW_KEY_PLACEHOLDER">' . esc_html__( 'Remove', 'capture' ) . '</button>';
-		echo '</div>';
+				<p>
+					<label for="capture-name-NEW_KEY_PLACEHOLDER">
+						<?php esc_html_e( 'Connection Name (Optional)', 'capture' ); ?>:
+					</label><br/>
+					<input id="capture-name-NEW_KEY_PLACEHOLDER" 
+					       type="text" 
+					       name="capture_options[ems_connections][NEW_KEY_PLACEHOLDER][name]" 
+					       placeholder="<?php esc_attr_e( 'e.g., Newsletter Opt-ins', 'capture' ); ?>" />
+				</p>
 
-		echo '<div class="capture-connection-status"></div>';
-		echo '</div>';
-		echo '</script>';
+				<p>
+					<label for="capture-api-key-NEW_KEY_PLACEHOLDER">
+						<?php esc_html_e( 'API Key', 'capture' ); ?>:
+					</label><br/>
+					<input id="capture-api-key-NEW_KEY_PLACEHOLDER" 
+					       type="text" 
+					       class="capture-api-key-input" 
+					       name="capture_options[ems_connections][NEW_KEY_PLACEHOLDER][api_key]" />
+				</p>
+
+				<div class="capture-connection-actions">
+					<button type="button" 
+					        class="button capture-save-test-connection" 
+					        data-id="NEW_KEY_PLACEHOLDER">
+						<?php esc_html_e( 'Save & Test', 'capture' ); ?>
+					</button>
+					<button type="button" 
+					        class="button capture-remove-connection" 
+					        data-id="NEW_KEY_PLACEHOLDER">
+						<?php esc_html_e( 'Remove', 'capture' ); ?>
+					</button>
+				</div>
+
+				<div class="capture-connection-status"></div>
+			</div>
+		</script>
+		<?php
 	}
 
 	/**
@@ -211,7 +272,7 @@ class Admin_Connections {
 			// If encryption returned the same value and OpenSSL is loaded and keys are configured,
 			// it implies an encryption failure for some other reason, or the key was empty.
 			// We already check for empty raw_api_key, so this is an unexpected state.
-			error_log( 'WP Capture: API Key encryption failed unexpectedly for new connection.' );
+			error_log( 'WP Capture: Connection encryption failed' );
 			wp_send_json_error( array( 'message' => __( 'Could not securely save the API key. Encryption failed.', 'capture' ) ) );
 			return;
 		}
@@ -419,7 +480,7 @@ class Admin_Connections {
 			}
 			$api_key_to_save = $encryption_service->encrypt( $submitted_raw_api_key );
 			if ( $api_key_to_save === $submitted_raw_api_key && ! empty( $submitted_raw_api_key ) && extension_loaded( 'openssl' ) && \Capture\Encryption::is_properly_configured() ) {
-				error_log( 'WP Capture: API Key encryption failed unexpectedly during update.' );
+				error_log( 'WP Capture: Connection update encryption failed' );
 				wp_send_json_error( array( 'message' => __( 'Could not securely save the new API key. Encryption failed.', 'capture' ) ) );
 				return;
 			}

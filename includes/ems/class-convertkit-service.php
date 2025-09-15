@@ -49,6 +49,13 @@ class ConvertKit_Service implements Ems_Service_Interface {
 			return array();
 		}
 
+		$cache_key = 'capture_convertkit_lists_' . md5( $credentials['api_key'] );
+		$cached    = get_transient( $cache_key );
+		
+		if ( false !== $cached ) {
+			return $cached;
+		}
+		
 		$response = wp_remote_get( self::API_ENDPOINT . 'forms?api_key=' . $credentials['api_key'] );
 
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
@@ -66,6 +73,9 @@ class ConvertKit_Service implements Ems_Service_Interface {
 				);
 			}
 		}
+
+		// Cache for 5 minutes.
+		set_transient( $cache_key, $lists, 300 );
 
 		return $lists;
 	}

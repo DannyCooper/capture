@@ -107,7 +107,7 @@ class Encryption {
 
 		$method = 'aes-256-ctr';
 		$ivlen  = openssl_cipher_iv_length( $method );
-		$iv     = openssl_random_pseudo_bytes( $ivlen );
+		$iv     = random_bytes( $ivlen );
 
 		$raw_value = openssl_encrypt( $value . self::$salt, $method, self::$key, 0, $iv );
 

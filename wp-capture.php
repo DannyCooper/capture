@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name:       Capture
- * Plugin URI:        https://wpcature.com
+ * Plugin URI:        https://wpcapture.com
  * Description:       A WordPress plugin for capturing email subscriptions with EMS integration and local storage options.
- * Version:           1.0.4
+ * Version:           1.0.5
  * Author:            DannyCooper
  * Author URI:        https://dannycooper.com
  * License:           GPL-2.0+
@@ -22,7 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Define plugin constants.
-define( 'CAPTURE_VERSION', '1.0.4' );
+define( 'CAPTURE_VERSION', '1.0.5' );
 define( 'CAPTURE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CAPTURE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 

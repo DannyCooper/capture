@@ -204,7 +204,7 @@ function get_ems_lists_callback( \WP_REST_Request $request ) {
 
 		// Check for potential decryption issues.
 		if ( $decrypted_api_key === $stored_encrypted_api_key && ! empty( $stored_encrypted_api_key ) && extension_loaded( 'openssl' ) && \Capture\Encryption::is_properly_configured() ) {
-			// error_log( 'WP Capture REST API: API Key decryption failed for ' . esc_html( $ems_id ) . ' or returned original encrypted value unexpectedly.' ); // Removed error_log.
+
 			return new \WP_REST_Response(
 				array(
 					'success' => false,
@@ -219,7 +219,7 @@ function get_ems_lists_callback( \WP_REST_Request $request ) {
 			// This means decryption failed and returned an empty string, or it was stored empty AND OpenSSL is off / keys bad.
 			// If stored_encrypted_api_key was indeed empty, the first check would have caught it.
 			// So this implies a failure to decrypt an actual key, or it was stored as empty string post-encryption (unlikely).
-			// error_log( 'WP Capture REST API: Decrypted API key is empty for ' . esc_html( $ems_id ) . ' (Provider: ' . esc_html( $provider_slug ) . ')' ); // Removed error_log.
+
 			return new \WP_REST_Response(
 				array(
 					'success' => false,
@@ -280,7 +280,7 @@ function get_ems_lists_callback( \WP_REST_Request $request ) {
 			200
 		);
 	} catch ( \Exception $e ) {
-		error_log( 'WP Capture API Error (get-ems-lists): ' . $e->getMessage() );
+		error_log( 'WP Capture: EMS list retrieval failed' );
 		return new \WP_REST_Response(
 			array(
 				'success' => false,

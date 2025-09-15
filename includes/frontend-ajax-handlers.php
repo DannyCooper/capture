@@ -191,7 +191,7 @@ function submit_to_ems( $email, $ems_connection_id, $list_id, $post_id, $form_id
 			return new \WP_Error( 'ems_subscription_failed', \sprintf( \esc_html__( 'Could not subscribe with %s. Please try again later.', 'capture' ), \esc_html( $provider_name ) ) );
 		}
 	} catch ( \Exception $e ) {
-		\error_log( 'WP Capture EMS Submission Error: ' . $e->getMessage() );
+		\error_log( 'WP Capture: EMS submission failed' );
 		/* translators: %s: The EMS provider name */
 		return new \WP_Error( 'ems_exception', \sprintf( \esc_html__( 'An unexpected error occurred with %s. Please try again later.', 'capture' ), \esc_html( $provider_name ) ) );
 	}
