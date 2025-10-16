@@ -29,6 +29,7 @@ $button_text               = ! empty( $attributes['buttonText'] ) ? $attributes[
 $button_color              = ! empty( $attributes['buttonColor'] ) ? $attributes['buttonColor'] : '';
 $button_text_color         = ! empty( $attributes['buttonTextColor'] ) ? $attributes['buttonTextColor'] : '';
 $button_hover_color        = ! empty( $attributes['buttonHoverColor'] ) ? $attributes['buttonHoverColor'] : '';
+$show_labels               = ! empty( $attributes['showLabels'] ) ? $attributes['showLabels'] : false;
 $show_name_field           = ! empty( $attributes['showNameField'] ) ? $attributes['showNameField'] : false;
 $show_privacy_policy       = ! empty( $attributes['showPrivacyPolicy'] ) ? $attributes['showPrivacyPolicy'] : false;
 $disable_core_styles       = ! empty( $attributes['disableCoreStyles'] ) ? $attributes['disableCoreStyles'] : false;
@@ -117,27 +118,37 @@ if ( ! $disable_core_styles ) {
 		data-form-id="<?php echo esc_attr( $form_html_id ); ?>"
 	>	
 		<?php if ( $show_name_field ) : ?>
+			<div class="capture-form__field capture-form__field--name">
+				<?php if ( $show_labels ) : ?>
+					<label for="first_name"><?php echo esc_html__( 'First name', 'capture' ); ?></label>
+				<?php endif; ?>
+				<input 
+					id="first_name"
+					type="text" 
+					class="capture-form__input capture-form__input--name" 
+					autocomplete="given-name"
+					aria-label="<?php echo esc_attr__( 'First name', 'capture' ); ?>"
+					name="first_name" 
+					placeholder="<?php echo esc_attr__( 'Enter your first name', 'capture' ); ?>" 
+						required 
+					/>
+			</div>
+		<?php endif; ?>
+		<div class="capture-form__field capture-form__field--email">
+			<?php if ( $show_labels ) : ?>
+				<label for="email"><?php echo esc_html__( 'Email address', 'capture' ); ?></label>
+			<?php endif; ?>
 			<input 
-				type="text" 
-				class="capture-form__input capture-form__input--name" 
-				autocomplete="given-name"
-				aria-label="<?php echo esc_attr__( 'First name', 'capture' ); ?>"
-				name="first_name" 
-				placeholder="<?php echo esc_attr__( 'Enter your first name', 'capture' ); ?>" 
+				id="email"
+				type="email" 
+				class="capture-form__input capture-form__input--email" 
+				autocomplete="email"
+				aria-label="<?php echo esc_attr__( 'Email address', 'capture' ); ?>"
+				name="email" 
+				placeholder="<?php echo esc_attr__( 'Enter your email address', 'capture' ); ?>" 
 				required 
 			/>
-		<?php endif; ?>
-		
-		<input 
-			type="email" 
-			class="capture-form__input capture-form__input--email" 
-			autocomplete="email"
-			aria-label="<?php echo esc_attr__( 'Email address', 'capture' ); ?>"
-			name="email" 
-			placeholder="<?php echo esc_attr__( 'Enter your email address', 'capture' ); ?>" 
-			required 
-		/>
-		
+		</div>
 		<button type="submit" class="capture-form__button">
 			<?php echo esc_html( $button_text ? $button_text : esc_html__( 'Subscribe', 'capture' ) ); ?>
 		</button>

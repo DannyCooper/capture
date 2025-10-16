@@ -22,6 +22,7 @@ export default function FormInspectorControls({
 		fieldGap,
 		showNameField,
 		showPrivacyPolicy,
+		showLabels,
 		buttonColor,
 		buttonTextColor,
 		buttonHoverColor,
@@ -83,6 +84,11 @@ export default function FormInspectorControls({
 						label={__('Show Name Field', 'capture')}
 						checked={showNameField}
 						onChange={(newShowNameField) => setAttributes({ showNameField: newShowNameField })}
+					/>
+					<CheckboxControl
+						label={__('Show Labels', 'capture')}
+						checked={showLabels}
+						onChange={(newShowLabels) => setAttributes({ showLabels: newShowLabels })}
 					/>
 					<CheckboxControl
 						label={__('Show Privacy Policy', 'capture')}

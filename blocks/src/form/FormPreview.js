@@ -9,6 +9,7 @@ export default function FormPreview({ attributes, optionsFromAPI }) {
 		fieldGap,
 		showNameField,
 		showPrivacyPolicy,
+		showLabels,
 		buttonColor,
 		buttonTextColor,
 		disableCoreStyles,
@@ -55,14 +56,22 @@ export default function FormPreview({ attributes, optionsFromAPI }) {
 			<div className="capture-form__preview">
 				<div style={formStyles}>
 					{showNameField && (
-						<input
-							type="text"
-							id={blockProps.id + '-name'}
-							className="capture-form__input"
-							style={inputStyles}
-							placeholder={__('First name', 'capture')}
-							readOnly
-						/>
+						<>
+							{showLabels && (
+								<label htmlFor={blockProps.id + '-name'}>{__('First name', 'capture')}</label>
+							)}
+							<input
+								type="text"
+								id={blockProps.id + '-name'}
+								className="capture-form__input"
+								style={inputStyles}
+								placeholder={__('First name', 'capture')}
+								readOnly
+							/>
+						</>
+					)}
+					{showLabels && (
+						<label htmlFor={blockProps.id + '-email'}>{__('Email address', 'capture')}</label>
 					)}
 					<input
 						type="email"
@@ -72,7 +81,7 @@ export default function FormPreview({ attributes, optionsFromAPI }) {
 						placeholder={__('Email address', 'capture')}
 						value={__('example@domain.com', 'capture')}
 						readOnly
-						/>
+					/>
 					
 					<button
 						type="button"

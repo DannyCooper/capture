@@ -35,6 +35,10 @@
       "type": "boolean",
       "default": false
     },
+    "showLabels": {
+      "type": "boolean",
+      "default": false
+    },
     "showPrivacyPolicy": {
       "type": "boolean",
       "default": false

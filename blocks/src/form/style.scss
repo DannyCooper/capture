@@ -16,6 +16,12 @@
             flex-direction: column;
         }
     }
+
+    .capture-form__field {
+        display: flex;
+        flex-direction: column;
+    }
+
     .capture-form__input,
     .capture-form__input--email,
     .capture-form__input--name,
@@ -26,7 +32,6 @@
         line-height: normal;
         flex-grow: 1;
         width: auto;
-        border: 0
     }
 
 	.capture-form__button {
