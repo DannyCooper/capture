@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
-import { InspectorControls, PanelColorSettings } from '@wordpress/block-editor';
-import { PanelBody, SelectControl, Placeholder, Spinner, TextControl, TextareaControl, RangeControl, CheckboxControl } from '@wordpress/components';
+import { InspectorControls } from '@wordpress/block-editor';
+import { SelectControl, Placeholder, Spinner, TextControl, TextareaControl, CheckboxControl, BorderBoxControl, BorderControl, Panel, PanelBody, PanelRow} from '@wordpress/components';
+import { __experimentalColorGradientSettingsDropdown as ColorGradientSettingsDropdown, PanelColorSettings } from '@wordpress/block-editor';
 
 export default function FormInspectorControls({
 	attributes,
@@ -11,25 +12,19 @@ export default function FormInspectorControls({
 	emsLists,
 	isLoadingLists,
 	listsError,
-	optionsFromAPI
+	optionsFromAPI,
+	clientId
 }) {
 	const {
-		emsConnectionId,
+		emsConnectionId,	
 		selectedListId,
 		formId,
-		formLayout,
 		successMessage,
-		fieldGap,
-		showNameField,
-		showPrivacyPolicy,
-		showLabels,
-		buttonColor,
-		buttonTextColor,
-		buttonHoverColor,
-		inputColor,
-		inputBackgroundColor,
-		privacyPolicyTextColor,
 		disableCoreStyles,
+		inputTextColor,
+		inputBackgroundColor,
+		inputBorderColor,
+		inputBorder
 	} = attributes;
 
 	// Handle provider change - clear both connection and selected list.
@@ -37,64 +32,25 @@ export default function FormInspectorControls({
 		setAttributes({ emsConnectionId: newConnectionId, selectedListId: '' });
 	};
 
-	// Define the color settings for the panel.
 	const colorSettings = [
 		{
-			value: buttonTextColor,
-			onChange: (value) => setAttributes({ buttonTextColor: value }),
-			label: __('Text Color', 'capture'),
+			colorLabel: __('Input Text Color', 'capture'),
+			colorValue: inputTextColor,
+			onChange: (colorValue) => setAttributes({ inputTextColor: colorValue }),
+			resetAllFilter: () => setAttributes({ inputTextColor: undefined }),
 		},
 		{
-			value: buttonColor,
-			onChange: (value) => setAttributes({ buttonColor: value }),
-			label: __('Background Color', 'capture'),
-		},
-		{
-			value: buttonHoverColor,
-			onChange: (value) => setAttributes({ buttonHoverColor: value }),
-			label: __('Background Hover Color', 'capture'),
+			colorLabel: __('Input Background Color', 'capture'),
+			colorValue: inputBackgroundColor,
+			onChange: (colorValue) => setAttributes({ inputBackgroundColor: colorValue }),
+			resetAllFilter: () => setAttributes({ inputBackgroundColor: undefined }),
 		},
 	];
-
-	const inputColorSettings = [
-		{
-			value: inputColor,
-			onChange: (value) => setAttributes({ inputColor: value }),
-			label: __('Text Color', 'capture'),
-		},
-		{
-			value: inputBackgroundColor,
-			onChange: (value) => setAttributes({ inputBackgroundColor: value }),
-			label: __('Background Color', 'capture'),
-		},
-	]
-	const privacyPolicyColorSettings = [
-		{
-			value: privacyPolicyTextColor,
-			onChange: (value) => setAttributes({ privacyPolicyTextColor: value }),
-			label: __('Text Color', 'capture'),
-		},
-	]
 
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={__('Form Settings', 'capture')}>
-					<CheckboxControl
-						label={__('Show Name Field', 'capture')}
-						checked={showNameField}
-						onChange={(newShowNameField) => setAttributes({ showNameField: newShowNameField })}
-					/>
-					<CheckboxControl
-						label={__('Show Labels', 'capture')}
-						checked={showLabels}
-						onChange={(newShowLabels) => setAttributes({ showLabels: newShowLabels })}
-					/>
-					<CheckboxControl
-						label={__('Show Privacy Policy', 'capture')}
-						checked={showPrivacyPolicy}
-						onChange={(newShowPrivacyPolicy) => setAttributes({ showPrivacyPolicy: newShowPrivacyPolicy })}
-					/>
+				<PanelBody title={__('Form Settings', 'capture')}>	
 					<TextControl
 						label={__('Form ID', 'capture')}
 						value={formId || ''}
@@ -154,52 +110,41 @@ export default function FormInspectorControls({
 					/>
 				</PanelBody>
 			</InspectorControls>
+			<InspectorControls group="styles">
+				<PanelBody title="Input Styles" initialOpen={ true } >
+					<BorderControl
+						__next40pxDefaultSize
+						label={ __( 'Input Borders', 'capture' ) }
+						value={ inputBorder }
+						onChange={(value) => setAttributes({ inputBorder: value })}
+					/>
+						<PanelColorSettings
+							showTitle={ true }
+							__experimentalIsRenderedInSidebar
+							title={ __( 'Input Colors', 'capture' ) }
+							className="capture-form-color-settings"
+							initialOpen={ false }
+							colorSettings={ [
+								{
+									value: inputTextColor,
+									onChange: ( value ) => setAttributes( { inputTextColor: value } ),
+									label: __( 'Text Color', 'capture' ),
+								},
+								{
+									value: inputBackgroundColor,
+									onChange: (value) => setAttributes( { inputBackgroundColor: value } ),
+									label: __( 'Background Color', 'capture' ),
+								},
+							] }
+						/>
+				</PanelBody>
+			</InspectorControls>
 			<InspectorControls group="advanced">
 				<CheckboxControl
 					label={__('Disable Core Styles', 'capture')}
 					checked={disableCoreStyles}
 					onChange={(newDisableCoreStyles) => setAttributes({ disableCoreStyles: newDisableCoreStyles })}
 				/>
-			</InspectorControls>
-			<InspectorControls group="styles">
-				<PanelBody title={__('Form Layout', 'capture')}>
-					<SelectControl
-						label={__('Style', 'capture')}
-						value={formLayout}
-						options={[
-							{ label: 'Stacked', value: 'stacked' },
-							{ label: 'Inline', value: 'inline' },
-						]}
-						onChange={(newStyle) => setAttributes({ formLayout: newStyle })}
-						help={__('Stack the form fields or display them inline.', 'capture')}
-					/>
-					<RangeControl
-						label={__('Field Gap (rem)', 'capture')}
-						value={fieldGap}
-						onChange={(newFieldGap) => setAttributes({ fieldGap: newFieldGap })}
-						min={0}
-						max={5}
-						step={0.2}
-						help={__('Set the gap between form fields', 'capture')}
-					/>
-				</PanelBody>
-				<PanelColorSettings
-					title={__('Input Color Settings', 'capture')}
-					initialOpen={true}
-					colorSettings={inputColorSettings}
-				/>
-				<PanelColorSettings
-					title={__('Button Color Settings', 'capture')}
-					initialOpen={true}
-					colorSettings={colorSettings}
-				/>
-				{showPrivacyPolicy && (
-					<PanelColorSettings
-						title={__('Privacy Policy Color Settings', 'capture')}
-						initialOpen={true}
-						colorSettings={privacyPolicyColorSettings}
-					/>
-				)}
 			</InspectorControls>
 		</>
 	);

@@ -1,25 +1,17 @@
 .wp-block-capture-form:not(.capture-form--no-core-styles) {
 
-    .capture-form {
-        display: flex;
-        flex-grow: 1;
-        flex-direction: column;
-        gap: 1rem;
-
-        &--inline {
-            display: flex;
-            flex-direction: row;
-        }
-
-        &--stacked {
-            display: flex;
-            flex-direction: column;
-        }
-    }
+    align-items: stretch;
+    box-sizing: border-box;
 
     .capture-form__field {
         display: flex;
         flex-direction: column;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .capture-form__label {
+        margin-bottom: 0.25rem;
     }
 
     .capture-form__input,
@@ -30,33 +22,38 @@
         padding: 1rem;
         font-size: 1rem;
         line-height: normal;
-        flex-grow: 1;
-        width: auto;
+        box-sizing: border-box;
     }
 
 	.capture-form__button {
-		background: #0073aa;
+        border-style: solid;
+		background-color: #0073aa;
 		color: white;
-		border: none;
+		border-width: 0;
 		border-radius: 4px;
 		cursor: pointer;
-		transition: background-color 0.2s;
+		transition: background-color 0.2s, color 0.2s;
 
 		&:hover {
-			background: #005177;
+			background-color: var(--hover-bg-color, #005177);
+			color: var(--hover-text-color, white);
 		}
 	}
 
 	.capture-form__privacy-policy {
-        font-size: 0.7em;
-        text-align: center;
+        font-size: small;
         color: #666;
-        display: block;
-        margin-top: .7rem;
 
         a {
             color: inherit;
         }
+	}
+
+	// Make group blocks and container blocks span full width in flex layouts.
+	.wp-block-group,
+	.wp-block-columns {
+		flex-basis: 100% !important;
+		width: 100% !important;
 	}
 }
 

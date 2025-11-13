@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "title": "Capture Form",
   "category": "widgets",
-  "description": "A simple email capture form block with a button.",
+  "description": "A container for email capture form fields and submit button.",
   "attributes": {
     "emsConnectionId": {
       "type": "string",
@@ -19,51 +19,15 @@
       "type": "string",
       "default": ""
     },
-    "formLayout": {
-      "type": "string",
-      "default": "stacked"
-    },
     "successMessage": {
       "type": "string",
       "default": ""
-    },
-    "fieldGap": {
-      "type": "number",
-      "default": "1"
-    },
-    "showNameField": {
-      "type": "boolean",
-      "default": false
-    },
-    "showLabels": {
-      "type": "boolean",
-      "default": false
-    },
-    "showPrivacyPolicy": {
-      "type": "boolean",
-      "default": false
     },
     "disableCoreStyles": {
       "type": "boolean",
       "default": false
     },
-    "buttonText": {
-      "type": "string",
-      "default": "Subscribe"
-    },
-    "buttonColor": {
-      "type": "string",
-      "default": ""
-    },
-    "buttonTextColor": {
-      "type": "string",
-      "default": ""
-    },
-    "buttonHoverColor": {
-      "type": "string",
-      "default": ""
-    },
-    "inputColor": {
+    "inputTextColor" : {
       "type": "string",
       "default": ""
     },
@@ -71,13 +35,13 @@
       "type": "string",
       "default": ""
     },
-    "privacyPolicyTextColor": {
-      "type": "string",
-      "default": ""
+    "inputBorder": {
+      "type": "object",
+      "default": {}
     }
   },
   "supports": {
-    "html": true,
+    "html": false,
     "multiple": true,
     "background": {
       "backgroundImage": false,
@@ -86,10 +50,6 @@
     "color": {
       "background": true,
       "text": false
-    },
-    "spacing": {
-      "margin": true,
-      "padding": true
     },
     "align": [
       "wide",
@@ -100,11 +60,27 @@
       "radius": true,
       "style": true,
       "width": true
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true,
+      "blockGap": true,
+      "__experimentalDefaultControls": {
+        "blockGap": true
+      }
+    },
+    "layout": {
+      "allowEditing": false,
+      "default": {
+        "type": "flex",
+        "orientation": "vertical",
+        "justifyContent": "stretch"
+      }
     }
   },
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css",
-  "viewScript": "capture-form-frontend",
-  "render": "file:./render.php"
+  "render": "file:./render.php",
+  "viewScript": "capture-form-frontend"
 }

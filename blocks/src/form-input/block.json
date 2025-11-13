@@ -1,0 +1,70 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "capture/form-input",
+  "version": "0.1.0",
+  "title": "Form Input Field",
+  "category": "widgets",
+  "parent": ["capture/form", "core/group", "core/column"],
+  "description": "An input field for the Capture form.",
+  "attributes": {
+    "blockId": {
+      "type": "string",
+      "default": ""
+    },
+    "fieldType": {
+      "type": "string",
+      "default": "email",
+      "enum": ["email", "name", "custom"]
+    },
+    "customFieldValue": {
+      "type": "string",
+      "default": ""
+    },
+    "fieldName": {
+      "type": "string",
+      "default": "email"
+    },
+    "label": {
+      "type": "string",
+      "default": ""
+    },
+    "placeholder": {
+      "type": "string",
+      "default": ""
+    },
+    "required": {
+      "type": "boolean",
+      "default": true
+    },
+    "autocomplete": {
+      "type": "string",
+      "default": ""
+    },
+    "showLabel": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "supports": {
+    "html": false,
+    "multiple": true,
+    "spacing": {
+        "margin": true,
+        "padding": true
+    },
+    "__experimentalBorder": {
+        "radius": true,
+        "color": true,
+        "width": true,
+        "style": true,
+        "__experimentalDefaultControls": {
+            "width": true,
+            "color": true
+        }
+    }
+  },
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}
+

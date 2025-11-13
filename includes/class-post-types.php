@@ -59,14 +59,12 @@ class Post_Types {
 			'capability_type'    => 'post',
 			'has_archive'        => false,
 			'hierarchical'       => false,
-			'menu_position'      => null,
-			'menu_icon'          => 'dashicons-feedback',
-			'supports'           => array( 'title', 'editor', 'revisions' ),
-			'show_in_rest'       => true,
-			'template'           => array(
-				array( 'capture/form' ),
-			),
-		);
+		'menu_position'      => null,
+		'menu_icon'          => 'dashicons-feedback',
+		'supports'           => array( 'title', 'editor', 'revisions' ),
+		'show_in_rest'       => true,
+		'template'           => array(),
+	);
 
 		register_post_type( 'capture_form', $args );
 	}

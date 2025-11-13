@@ -4,7 +4,9 @@
  *
  * @package Capture
  *
- * @param array $attributes Block attributes.
+ * @param array    $attributes Block attributes.
+ * @param string   $content    Block content.
+ * @param WP_Block $block      Block instance.
  * @return void
  */
 
@@ -21,49 +23,25 @@ $ems_connection_id = isset( $attributes['emsConnectionId'] ) ? $attributes['emsC
 $selected_list_id  = isset( $attributes['selectedListId'] ) ? $attributes['selectedListId'] : false;
 
 // Form configuration.
-$form_html_id              = ! empty( $attributes['formId'] ) ? $attributes['formId'] : uniqid( 'capture-form-' );
-$form_layout               = ! empty( $attributes['formLayout'] ) ? $attributes['formLayout'] : '';
-$field_gap                 = ! empty( $attributes['fieldGap'] ) ? $attributes['fieldGap'] : '';
-$success_message           = ! empty( $attributes['successMessage'] ) ? $attributes['successMessage'] : '';
-$button_text               = ! empty( $attributes['buttonText'] ) ? $attributes['buttonText'] : '';
-$button_color              = ! empty( $attributes['buttonColor'] ) ? $attributes['buttonColor'] : '';
-$button_text_color         = ! empty( $attributes['buttonTextColor'] ) ? $attributes['buttonTextColor'] : '';
-$button_hover_color        = ! empty( $attributes['buttonHoverColor'] ) ? $attributes['buttonHoverColor'] : '';
-$show_labels               = ! empty( $attributes['showLabels'] ) ? $attributes['showLabels'] : false;
-$show_name_field           = ! empty( $attributes['showNameField'] ) ? $attributes['showNameField'] : false;
-$show_privacy_policy       = ! empty( $attributes['showPrivacyPolicy'] ) ? $attributes['showPrivacyPolicy'] : false;
-$disable_core_styles       = ! empty( $attributes['disableCoreStyles'] ) ? $attributes['disableCoreStyles'] : false;
-$input_color               = ! empty( $attributes['inputColor'] ) ? $attributes['inputColor'] : '';
-$input_background_color    = ! empty( $attributes['inputBackgroundColor'] ) ? $attributes['inputBackgroundColor'] : '';
-$privacy_policy_text_color = ! empty( $attributes['privacyPolicyTextColor'] ) ? $attributes['privacyPolicyTextColor'] : '';
+$form_html_id        = ! empty( $attributes['formId'] ) ? $attributes['formId'] : uniqid( 'capture-form-' );
+$success_message     = ! empty( $attributes['successMessage'] ) ? $attributes['successMessage'] : '';
+$show_privacy_policy = ! empty( $attributes['showPrivacyPolicy'] ) ? $attributes['showPrivacyPolicy'] : false;
+$disable_core_styles = ! empty( $attributes['disableCoreStyles'] ) ? $attributes['disableCoreStyles'] : false;
+$input_text_color    = ! empty( $attributes['inputTextColor'] ) ? $attributes['inputTextColor'] : '';
+$input_bg_color      = ! empty( $attributes['inputBackgroundColor'] ) ? $attributes['inputBackgroundColor'] : '';
+$input_border        = ! empty( $attributes['inputBorder'] ) ? $attributes['inputBorder'] : array();
 
 // Get current post ID.
 $current_post_id = get_the_ID();
 
-// Generate form styles for inline CSS.
-$form_inline_css = sprintf(
-	'#capture-form-%1$s { gap: %2$srem; }
-	#capture-form-%1$s .capture-form__button { background-color: %3$s; color: %4$s; }
-	#capture-form-%1$s .capture-form__button:hover { background-color: %5$s; }
-	#capture-form-%1$s .capture-form__input { color: %6$s; background-color: %7$s; }
-	#capture-form-%1$s .capture-form__privacy-policy { color: %8$s; }',
-	esc_attr( $form_html_id ),
-	esc_attr( $field_gap ),
-	sanitize_hex_color( $button_color ),
-	sanitize_hex_color( $button_text_color ),
-	sanitize_hex_color( $button_hover_color ),
-	sanitize_hex_color( $input_color ),
-	sanitize_hex_color( $input_background_color ),
-	sanitize_hex_color( $privacy_policy_text_color )
-);
-
-$form_inline_css = apply_filters( 'capture_form_styles_' . $form_html_id, $form_inline_css );
+// Build unique ID for this form instance.
+$unique_form_id = 'capture-form-' . $form_html_id;
 
 // Get wrapper attributes.
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
-		'class' => $disable_core_styles ? 'capture-form--no-core-styles' : '',
-		'id'    => 'capture-form-' . $form_html_id,
+		'class' => $disable_core_styles ? 'capture-form capture-form--no-core-styles' : 'capture-form',
+		'id'    => $unique_form_id,
 	)
 );
 
@@ -98,64 +76,46 @@ if ( ! $disable_core_styles ) {
 		array(),
 		CAPTURE_VERSION
 	);
-
-	// Add dynamic form styles as inline CSS.
-	wp_add_inline_style( 'capture-form', $form_inline_css );
+	
+	// Generate custom CSS for this form instance if colors or borders are set.
+	if ( $input_text_color || $input_bg_color || ! empty( $input_border ) ) {
+		$custom_css = ":root :where(#$unique_form_id) .capture-form__input {";
+		if ( $input_text_color ) {
+			$custom_css .= 'color:' . esc_attr( $input_text_color ) . ';';
+		}
+		if ( $input_bg_color ) {
+			$custom_css .= 'background-color:' . esc_attr( $input_bg_color ) . ';';
+		}
+		if ( ! empty( $input_border ) ) {
+			if ( ! empty( $input_border['color'] ) ) {
+				$custom_css .= 'border-color:' . esc_attr( $input_border['color'] ) . ';';
+			}
+			if ( ! empty( $input_border['style'] ) ) {
+				$custom_css .= 'border-style:' . esc_attr( $input_border['style'] ) . ';';
+			}
+			if ( ! empty( $input_border['width'] ) ) {
+				$custom_css .= 'border-width:' . esc_attr( $input_border['width'] ) . ';';
+			}
+		}
+		$custom_css .= '}';
+		
+		// Add inline style after enqueue.
+		wp_add_inline_style( 'capture-form', $custom_css );
+	}
 }
 ?>
 
-<div <?php echo wp_kses_data( $wrapper_attributes ); ?>>
-	<form 
-		class="capture-form capture-form--<?php echo esc_attr( $form_layout ); ?>" 
-		data-success-message="<?php echo esc_attr( $success_message ); ?>" 
-		<?php if ( $selected_list_id ) : ?>
-		data-list-id="<?php echo esc_attr( $selected_list_id ); ?>" 
-		<?php endif; ?>
-		<?php if ( $ems_connection_id ) : ?>
-		data-ems-connection-id="<?php echo esc_attr( $ems_connection_id ); ?>" 
-		<?php endif; ?>
-		data-post-id="<?php echo esc_attr( $current_post_id ); ?>" 
-		data-form-id="<?php echo esc_attr( $form_html_id ); ?>"
-	>	
-		<?php if ( $show_name_field ) : ?>
-			<div class="capture-form__field capture-form__field--name">
-				<?php if ( $show_labels ) : ?>
-					<label for="first_name"><?php echo esc_html__( 'First name', 'capture' ); ?></label>
-				<?php endif; ?>
-				<input 
-					id="first_name"
-					type="text" 
-					class="capture-form__input capture-form__input--name" 
-					autocomplete="given-name"
-					aria-label="<?php echo esc_attr__( 'First name', 'capture' ); ?>"
-					name="first_name" 
-					placeholder="<?php echo esc_attr__( 'Enter your first name', 'capture' ); ?>" 
-						required 
-					/>
-			</div>
-		<?php endif; ?>
-		<div class="capture-form__field capture-form__field--email">
-			<?php if ( $show_labels ) : ?>
-				<label for="email"><?php echo esc_html__( 'Email address', 'capture' ); ?></label>
-			<?php endif; ?>
-			<input 
-				id="email"
-				type="email" 
-				class="capture-form__input capture-form__input--email" 
-				autocomplete="email"
-				aria-label="<?php echo esc_attr__( 'Email address', 'capture' ); ?>"
-				name="email" 
-				placeholder="<?php echo esc_attr__( 'Enter your email address', 'capture' ); ?>" 
-				required 
-			/>
-		</div>
-		<button type="submit" class="capture-form__button">
-			<?php echo esc_html( $button_text ? $button_text : esc_html__( 'Subscribe', 'capture' ) ); ?>
-		</button>
-	</form>
-	<?php if ( ! empty( $privacy_policy_text ) && $show_privacy_policy ) : ?>
-		<span class="capture-form__privacy-policy">
-			<?php echo wp_kses_post( $privacy_policy_text ); ?>
-		</span>
+<form 
+	<?php echo wp_kses_data( $wrapper_attributes ); ?>
+	data-success-message="<?php echo esc_attr( $success_message ); ?>" 
+	<?php if ( $selected_list_id ) : ?>
+	data-list-id="<?php echo esc_attr( $selected_list_id ); ?>" 
 	<?php endif; ?>
-</div> 
+	<?php if ( $ems_connection_id ) : ?>
+	data-ems-connection-id="<?php echo esc_attr( $ems_connection_id ); ?>" 
+	<?php endif; ?>
+	data-post-id="<?php echo esc_attr( $current_post_id ); ?>" 
+	data-form-id="<?php echo esc_attr( $form_html_id ); ?>"
+>	
+	<?php echo $content; ?>
+</form>

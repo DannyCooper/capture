@@ -1,4 +1,5 @@
 import { registerBlockType } from '@wordpress/blocks';
+import { InnerBlocks } from '@wordpress/block-editor';
 import Edit from './edit';
 import './editor.scss';
 import './style.scss';
@@ -17,9 +18,14 @@ const icon = () => {
     )
 }
 
+const Save = () => {
+	return <InnerBlocks.Content />;
+};
+
 const settings = {
 	icon,
 	edit: Edit,
+	save: Save,
 };
 
 registerBlockType( metadata.name, settings ); 

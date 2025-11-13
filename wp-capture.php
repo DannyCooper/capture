@@ -3,7 +3,7 @@
  * Plugin Name:       Capture
  * Plugin URI:        https://wpcapture.com
  * Description:       A WordPress plugin for capturing email subscriptions with EMS integration and local storage options.
- * Version:           1.0.5
+ * Version:           1.0.6
  * Author:            DannyCooper
  * Author URI:        https://dannycooper.com
  * License:           GPL-2.0+
@@ -22,7 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Define plugin constants.
-define( 'CAPTURE_VERSION', '1.0.5' );
+define( 'CAPTURE_VERSION', '1.0.6' );
 define( 'CAPTURE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CAPTURE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -74,3 +74,30 @@ function run_capture() {
 	$GLOBALS['capture_instance'] = $plugin;
 }
 run_capture();
+
+add_action( 'init', __NAMESPACE__ . '\register_patterns' );
+
+/**
+ * Register block patterns for the Capture plugin.
+ */
+function register_patterns() {
+	register_block_pattern_category(
+		'capture',
+		array(
+			'label' => __( 'Capture Forms', 'capture' ),
+		)
+	);
+
+	register_block_pattern(
+		'capture/basic',
+		array(
+			'title'         => __( 'Basic Form', 'capture' ),
+			'description'   => __( 'A basic form with heading and paragraph', 'capture' ),
+			'categories'    => array( 'capture' ),
+			'postTypes'     => array( 'capture_form' ),
+			'blockTypes'    => array( 'core/post-content' ),
+			'content'       => file_get_contents( CAPTURE_PLUGIN_DIR . 'patterns/basic.php' ),
+			'viewportWidth' => 600,
+		)
+	);
+}
